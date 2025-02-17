@@ -17,6 +17,7 @@ torch.backends.cudnn.deterministic = True
 def normalize_keypoints(
     kpts: torch.Tensor, size: Optional[torch.Tensor] = None
 ) -> torch.Tensor:
+    """"""
     if size is None:
         size = 1 + kpts.max(-2).values - kpts.min(-2).values
     elif not isinstance(size, torch.Tensor):
@@ -29,7 +30,9 @@ def normalize_keypoints(
 
 
 class LearnableFourierPositionalEncoding(nn.Module):
+    """"""
     def __init__(self, M: int, head_dim: int, gamma: float = 1.0) -> None:
+        """"""
         super().__init__()
         self.head_dim = head_dim
         self.gamma = gamma
@@ -49,7 +52,9 @@ class LearnableFourierPositionalEncoding(nn.Module):
 
 
 class TokenConfidence(nn.Module):
+    """"""
     def __init__(self, dim: int) -> None:
+        """"""
         super(TokenConfidence, self).__init__()
         self.token = nn.Sequential(nn.Linear(dim, 1), nn.Sigmoid())
 
@@ -62,10 +67,13 @@ class TokenConfidence(nn.Module):
 
 
 class Attention(nn.Module):
+    """"""
     def __init__(self) -> None:
+        """"""
         super().__init__()
 
     def forward(self, query, key, value) -> torch.Tensor:
+        """"""
         # print("query.shape : ", query.shape)
         # print("key.shape   : ", key.shape)
         # print("value.shape : ", value.shape)
@@ -78,7 +86,9 @@ class Attention(nn.Module):
 
 
 class SelfBlock(nn.Module):
+    """"""
     def __init__(self, embed_dim: int, num_heads: int, bias: bool = True) -> None:
+        """"""
         super().__init__()
         self.embed_dim = embed_dim
         self.num_heads = num_heads
@@ -95,55 +105,24 @@ class SelfBlock(nn.Module):
         )
 
     def forward(self, x: torch.Tensor, encoding: torch.Tensor) -> torch.Tensor:
+        """"""
         qkv: torch.Tensor = self.Wqkv(x)
         qkv = qkv.reshape(self.batch, -1, self.num_heads, self.head_dim, 3)
         qkv = qkv.transpose(1, 2)
         q, k, v = qkv[..., 0], qkv[..., 1], qkv[..., 2]
         q = self.apply_cached_rotary_emb(encoding, q)
         k = self.apply_cached_rotary_emb(encoding, k)
-
         q = q.contiguous()
         k = k.contiguous()
         v = v.contiguous()
-
-        # torch.cuda.synchronize()
-        # start_time = time.time()
-
-        # start_event = torch.cuda.Event(enable_timing=True)
-        # end_event   = torch.cuda.Event(enable_timing=True)
-        # start_event.record()
-
         context = self.inner_attn(q, k, v)
-
-        # end_event.record()
-        # torch.cuda.synchronize()
-        # dur_ms = start_event.elapsed_time(end_event)
-
-        # torch.cuda.synchronize()
-        # end_time = time.time()
-        # dur_ms = (end_time - start_time) * 1000
-
-        # print("----------------------------------------------------------------------------------------------------")
-        # print("      q.shape : ",       q.shape)
-        # print("      k.shape : ",       k.shape)
-        # print("      v.shape : ",       v.shape)
-        # print("context.shape : ", context.shape)
-        # print("     duration :  {:.2f}ms".format(dur_ms))
-        # print("----------------------------------------------------------------------------------------------------")
-
-        # context.shape == (1, 4, N, 64)
         context = context.transpose(1, 2)
         context = context.reshape(self.batch, -1, self.embed_dim)
         message = self.out_proj(context)
         return x + self.ffn(torch.cat((x, message), -1))
 
-        # temp = torch.cat((x, message), -1)
-        # print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ temp.shape : ", temp.shape)
-        # print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ embed_dim  : ", self.embed_dim)
-        # return x + self.ffn(temp)
-        
-
     def rotate_half(self, t: torch.Tensor) -> torch.Tensor:
+        """"""
         t = t.reshape(self.batch, self.num_heads, -1, self.head_dim // 2, 2)
         t = torch.stack((-t[..., 1], t[..., 0]), dim=-1)
         t = t.reshape(self.batch, self.num_heads, -1, self.head_dim)
@@ -152,11 +131,14 @@ class SelfBlock(nn.Module):
     def apply_cached_rotary_emb(
         self, freqs: torch.Tensor, t: torch.Tensor
     ) -> torch.Tensor:
+        """"""
         return (t * freqs[0]) + (self.rotate_half(t) * freqs[1])
 
 
 class CrossBlock(nn.Module):
+    """"""
     def __init__(self, embed_dim: int, num_heads: int, bias: bool = True) -> None:
+        """"""
         super().__init__()
         self.embed_dim = embed_dim
         self.num_heads = num_heads
@@ -174,80 +156,29 @@ class CrossBlock(nn.Module):
         )
 
     def forward(self, x0: torch.Tensor, x1: torch.Tensor) -> Tuple[torch.Tensor]:
-        # qk0 = self.to_qk(x0).reshape(self.batch, -1, self.embed_dim)
-        # qk1 = self.to_qk(x1).reshape(self.batch, -1, self.embed_dim)
-        # v0  = self.to_v(x0).reshape(self.batch, -1, self.embed_dim)
-        # v1  = self.to_v(x1).reshape(self.batch, -1, self.embed_dim)
-        # return v0, v1
-
-        # @
+        """"""
         qk0 = self.to_qk(x0).reshape(self.batch, -1, self.num_heads, self.head_dim).transpose(1, 2).contiguous()
         qk1 = self.to_qk(x1).reshape(self.batch, -1, self.num_heads, self.head_dim).transpose(1, 2).contiguous()
-        # @
 
-        # qk0, qk1 = map(self.to_qk, (x0, x1))
-        # v0, v1 = map(self.to_v, (x0, x1))
-        # qk0, qk1, v0, v1 = map(
-        #     lambda t: t.reshape(
-        #         self.batch, -1, self.num_heads, self.head_dim
-        #     ).transpose(1, 2),
-        #     (qk0, qk1, v0, v1),
-        # )
-
-        # start_time = time.time()
-
-        # @
         v1 = self.to_v(x1).reshape(self.batch, -1, self.num_heads, self.head_dim).transpose(1, 2).contiguous()
         m0 = self.inner_attn(qk0, qk1, v1)
         m0 = m0.transpose(1, 2).reshape(self.batch, -1, self.embed_dim)
-        # @
 
-        # end_time = time.time()
-        # print("----------------------------------------------------------------------------------------------------")
-        # print("qk0.shape : ", qk0.shape)
-        # print("qk1.shape : ", qk1.shape)
-        # print(" v1.shape : ",  v1.shape)
-        # print(" m0.shape : ",  m0.shape)
-        # print(" duration :  {:.2f}ms".format((end_time - start_time) * 1000))
-        # print("----------------------------------------------------------------------------------------------------")
-
-        # start_time = time.time()
-
-        # @
         v0 = self.to_v(x0).reshape(self.batch, -1, self.num_heads, self.head_dim).transpose(1, 2).contiguous()
         m1 = self.inner_attn(qk1, qk0, v0)
         m1 = m1.transpose(1, 2).reshape(self.batch, -1, self.embed_dim)
-        # @
-
-        # end_time = time.time()
-        # print("----------------------------------------------------------------------------------------------------")
-        # print("qk1.shape : ", qk1.shape)
-        # print("qk0.shape : ", qk0.shape)
-        # print(" v0.shape : ",  v0.shape)
-        # print(" m1.shape : ",  m0.shape)
-        # print(" duration :  {:.2f}ms".format((end_time - start_time) * 1000))
-        # print("----------------------------------------------------------------------------------------------------")
-
-        # m0, m1 = map(
-        #     lambda t: t.transpose(1, 2).reshape(self.batch, -1, self.embed_dim),
-        #     (m0, m1),
-        # )
-        # m0, m1 = map(self.to_out, (m0, m1))
-
-        # # @
-        # return m0, m1
-        # # @
 
         m0 = self.to_out(m0)
         m1 = self.to_out(m1)
         x0 = x0 + self.ffn(torch.cat([x0, m0], -1))
         x1 = x1 + self.ffn(torch.cat([x1, m1], -1))
-
         return x0, x1
 
 
 class TransformerLayer(nn.Module):
+    """"""
     def __init__(self, embed_dim: int, num_heads: int):
+        """"""
         super().__init__()
         self.self_attn  = SelfBlock(embed_dim, num_heads)
         self.cross_attn = CrossBlock(embed_dim, num_heads)
@@ -259,9 +190,9 @@ class TransformerLayer(nn.Module):
         encoding0: torch.Tensor,
         encoding1: torch.Tensor,
     ) -> Tuple[torch.Tensor]:
+        """"""
         desc0 = self.self_attn(desc0, encoding0)
         desc1 = self.self_attn(desc1, encoding1)
-        # return desc0, desc1
         return self.cross_attn(desc0, desc1)
 
 
@@ -277,7 +208,9 @@ def sigmoid_log_double_softmax(
 
 
 class MatchAssignment(nn.Module):
+    """"""
     def __init__(self, dim: int) -> None:
+        """"""
         super(MatchAssignment, self).__init__()
         self.dim = dim
         self.scale = dim**0.25
@@ -286,8 +219,6 @@ class MatchAssignment(nn.Module):
 
     def forward(self, desc0: torch.Tensor, desc1: torch.Tensor) -> torch.Tensor:
         """build assignment matrix from descriptors"""
-        # mdesc0, mdesc1 = map(self.final_proj, (desc0, desc1))
-        # mdesc0, mdesc1 = map(lambda t: t / self.scale, (mdesc0, mdesc1))
         mdesc0 = self.final_proj(desc0) / self.scale
         mdesc1 = self.final_proj(desc1) / self.scale
         sim = mdesc0 @ mdesc1.transpose(1, 2)
@@ -297,6 +228,7 @@ class MatchAssignment(nn.Module):
         return scores
 
     def get_matchability(self, desc: torch.Tensor):
+        """"""
         return torch.sigmoid(self.matchability(desc)).squeeze(-1)
 
 
@@ -321,14 +253,13 @@ def filter_matches(scores: torch.Tensor, th: float):
 
     m_indices_0 = indices0[valid0]
     m_indices_1 = m0[0][m_indices_0]
-
     matches = torch.stack([m_indices_0, m_indices_1], -1)
     mscores = mscores0[0][m_indices_0]
-    
     return matches, mscores
 
 
 class LightGlue(nn.Module):
+    """"""
     default_conf = {
         "name": "lightglue",  # just for interfacing
         "input_dim": 256,  # input descriptor dimension (autoselected from weights)
@@ -350,6 +281,7 @@ class LightGlue(nn.Module):
     }
 
     def __init__(self, features="superpoint", **conf) -> None:
+        """"""
         super().__init__()
         self.conf = {**self.default_conf, **conf}
         if features is not None:
@@ -370,14 +302,6 @@ class LightGlue(nn.Module):
         self.transformers = nn.ModuleList([TransformerLayer(d, h) for _ in range(n)])
 
         self.log_assignment = nn.ModuleList([MatchAssignment(d) for _ in range(n)])
-
-        # self.token_confidence = nn.ModuleList(
-        #     [TokenConfidence(d) for _ in range(n - 1)]
-        # )
-        # self.register_buffer(
-        #     "confidence_thresholds",
-        #     torch.Tensor([self.confidence_threshold(i) for i in range(n)]),
-        # )
 
         state_dict = None
         if features is not None:
@@ -408,134 +332,22 @@ class LightGlue(nn.Module):
         desc0: torch.Tensor,
         desc1: torch.Tensor,
     ):
+        """"""
         b, m, _ = kpts0.shape
         b, n, _ = kpts1.shape
 
         lightglue_descriptors_0 = self.input_proj(desc0)
         lightglue_descriptors_1 = self.input_proj(desc1)
-
         # cache positional embeddings
         lightglue_encoding_0 = self.posenc(kpts0)
         lightglue_encoding_1 = self.posenc(kpts1)
 
-        # # GNN + final_proj + assignment
-        # do_early_stop = False  # self.conf.depth_confidence > 0
-        # do_point_pruning = False  # self.conf.width_confidence > 0
-        # if do_point_pruning:
-        #     ind0 = torch.arange(0, m, device=kpts0.device)[None]
-        #     ind1 = torch.arange(0, n, device=kpts0.device)[None]
-
-        # print(f"self.conf.n_layers : {self.conf.n_layers}")
         for i in range(self.conf.n_layers):
-        # for i in range(1):
-            # self+cross attention
             lightglue_descriptors_0, lightglue_descriptors_1 = self.transformers[i](
                 lightglue_descriptors_0, 
                 lightglue_descriptors_1, 
                 lightglue_encoding_0, 
                 lightglue_encoding_1
             )
-            # print(f"{i} : ")
-            # print("lightglue_descriptors_0.shape : ", lightglue_descriptors_0.shape)
-            # print("lightglue_descriptors_1.shape : ", lightglue_descriptors_1.shape)
-            # print("-" * 60)
-
-            # if i == self.conf.n_layers - 1:
-            #     continue  # no early stopping or adaptive width at last layer
-
-            # token0, token1 = None, None
-            # if do_early_stop:  # early stopping
-            #     token0, token1 = self.token_confidence[i](desc0, desc1)
-            #     if self.check_if_stop(token0[..., :m, :], token1[..., :n, :], i, m + n):
-            #         break
-
-            # if do_point_pruning:  # point pruning
-            #     scores0 = self.log_assignment[i].get_matchability(desc0)
-            #     prunemask0 = self.get_pruning_mask(token0, scores0, i)
-            #     keep0 = torch.where(prunemask0)[1]
-            #     ind0 = ind0.index_select(1, keep0)
-            #     desc0 = desc0.index_select(1, keep0)
-            #     encoding0 = encoding0.index_select(-2, keep0)
-
-            #     scores1 = self.log_assignment[i].get_matchability(desc1)
-            #     prunemask1 = self.get_pruning_mask(token1, scores1, i)
-            #     keep1 = torch.where(prunemask1)[1]
-            #     ind1 = ind1.index_select(1, keep1)
-            #     desc1 = desc1.index_select(1, keep1)
-            #     encoding1 = encoding1.index_select(-2, keep1)
-
-        # desc0, desc1 = desc0[..., :m, :], desc1[..., :n, :]
-
-        # return (lightglue_descriptors_0, lightglue_descriptors_1)
-
-        # print(f"i : {i}")
         lightglue_scores = self.log_assignment[self.conf.n_layers - 1](lightglue_descriptors_0, lightglue_descriptors_1)
         return lightglue_descriptors_0, lightglue_descriptors_1, lightglue_scores
-
-        # match_indices, match_scores = filter_matches(scores, self.conf.filter_threshold)
-        # match_indices = match_indices.unsqueeze(0)
-        # match_scores  = match_scores.unsqueeze(0)
-
-        # print("scores.shape        : ", scores.shape)
-        # print("match_indices.shape : ", match_indices.shape)
-        # print("match_scores.shape  : ", match_scores.shape)
-        # print("-" * 60)
-
-        # return match_indices, match_scores
-
-
-        # # Skip unnecessary computation
-        # m0, m1, mscores0, mscores1 = filter_matches(scores, self.conf.filter_threshold)
-
-        # valid = m0[0] > -1
-        # m_indices_0 = torch.where(valid)[0]
-        # m_indices_1 = m0[0][valid]
-        # if do_point_pruning:
-        #     m_indices_0 = ind0[0, m_indices_0]
-        #     m_indices_1 = ind1[0, m_indices_1]
-
-        # matches = torch.stack([m_indices_0, m_indices_1], -1)
-        # mscores = mscores0[0][valid]
-
-        # if do_point_pruning:  # scatter with indices after pruning
-        #     m0_ = torch.full((b, m), -1, device=m0.device, dtype=m0.dtype)
-        #     m1_ = torch.full((b, n), -1, device=m1.device, dtype=m1.dtype)
-        #     m0_[:, ind0] = torch.where(m0 == -1, -1, ind1.gather(1, m0.clamp(min=0)))
-        #     m1_[:, ind1] = torch.where(m1 == -1, -1, ind0.gather(1, m1.clamp(min=0)))
-        #     mscores0_ = torch.zeros((b, m), device=mscores0.device)
-        #     mscores1_ = torch.zeros((b, n), device=mscores1.device)
-        #     mscores0_[:, ind0] = mscores0
-        #     mscores1_[:, ind1] = mscores1
-        #     m0, m1, mscores0, mscores1 = m0_, m1_, mscores0_, mscores1_
-
-        # return matches, mscores
-
-    def confidence_threshold(self, layer_index: int) -> float:
-        """scaled confidence threshold"""
-        threshold = 0.8 + 0.1 * np.exp(-4.0 * layer_index / self.conf.n_layers)
-        return np.clip(threshold, 0, 1)
-
-    def get_pruning_mask(
-        self,
-        confidences: Optional[torch.Tensor],
-        scores: torch.Tensor,
-        layer_index: int,
-    ) -> torch.Tensor:
-        """mask points which should be removed"""
-        keep = scores > (1 - self.conf.width_confidence)
-        if confidences is not None:  # Low-confidence points are never pruned.
-            keep |= confidences <= self.confidence_thresholds[layer_index]
-        return keep
-
-    def check_if_stop(
-        self,
-        confidences0: torch.Tensor,
-        confidences1: torch.Tensor,
-        layer_index: int,
-        num_points: int,
-    ) -> torch.Tensor:
-        """evaluate stopping condition"""
-        confidences = torch.cat([confidences0, confidences1], -1)
-        threshold = self.confidence_thresholds[layer_index]
-        ratio_confident = 1.0 - (confidences < threshold).float().sum() / num_points
-        return ratio_confident > self.conf.depth_confidence

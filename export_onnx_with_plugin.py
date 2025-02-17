@@ -207,7 +207,6 @@ def export_onnx(
                 }
             )
 
-        # without the final log_assignment
         # batch_dim has to be 1
         lightglue_descriptors_0, lightglue_descriptors_1, lightglue_scores = lightglue(
             keypoints_topk_normalized_0, 

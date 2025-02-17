@@ -33,20 +33,19 @@ def parse_args() -> argparse.Namespace:
         help="Sample image size for ONNX tracing. If a single integer is given, resize the longer side of the image to this value. Otherwise, please provide two integers. Example : --img_size 256,512",
     )
     parser.add_argument(
-        "--superpoint_onnx_path", # originally is --extractor_path
+        "--superpoint_onnx_path",
         type=str,
         default=None,
         required=False,
         help="Path to save the feature extractor ONNX model.",
     )
     parser.add_argument(
-        "--lightglue_onnx_path", # originally is --lightglue_path
+        "--lightglue_onnx_path",
         type=str,
         default=None,
         required=False,
         help="Path to save the LightGlue ONNX model.",
     )
-    # Extractor-specific args:
     parser.add_argument(
         "--max_num_keypoints",
         type=int,
@@ -60,13 +59,10 @@ def parse_args() -> argparse.Namespace:
 
 def export_onnx(
     img_size=512,
-    # extractor_type="superpoint",  # delete
     superpoint_onnx_path=None,
     lightglue_onnx_path=None,
     img_0_path="./assets/sacre_coeur1.jpg",
     img_1_path="./assets/sacre_coeur2.jpg",
-    # end2end=False,    # delete
-    # dynamic=False,    # delete
     max_num_keypoints=None,
 ):
     # Handle args
@@ -87,8 +83,6 @@ def export_onnx(
     lightglue = LightGlue("superpoint").eval()
 
     with torch.no_grad():
-        # batch_dim has to be 1 for images with different sizes, 
-        # or we can write a non-one batch_dim version for images with same size, then we have to put batch_dim into dynamic_axes.
         if superpoint_onnx_path is not None:
             torch.onnx.export(
                 superpoint,
@@ -207,7 +201,6 @@ def export_onnx(
                 }
             )
 
-        # without the final log_assignment
         # batch_dim has to be 1
         lightglue_descriptors_0, lightglue_descriptors_1, lightglue_scores = lightglue(
             keypoints_topk_normalized_0, 
