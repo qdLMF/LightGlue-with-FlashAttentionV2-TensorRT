@@ -1,0 +1,203 @@
+download and compile cutlass
+
+mkdir third_party
+cd third_party
+git clone -b v3.4.1 https://github.com/NVIDIA/cutlass.git ./cutlass-v3.4.1
+cd cutlass-v3.4.1
+mkdir build
+cd build
+export CUDACXX=/usr/local/cuda/bin/nvcc
+cmake .. -DCUTLASS_NVCC_ARCHS=87
+
+----------
+
+compile the plugin
+
+cd lightglue_attention_plugin
+mkdir build
+cd build
+cmake ..
+make -j4
+
+----------
+
+mkdir onnx_files
+mkdir trt_engine_files
+
+----------
+
+generate onnx files:
+
+python3 export_onnx_with_plugin.py 
+--img_size 512 
+--superpoint_onnx_path ./onnx_files/superpoint.onnx 
+--lightglue_onnx_path ./onnx_files/lightglue_for_superpoint_with_plugin.onnx 
+--max_num_keypoints 1024
+
+----------
+
+generate onnx files:
+
+python3 export_onnx_no_plugin.py 
+--img_size 512 
+--lightglue_onnx_path ./onnx_files/lightglue_for_superpoint_no_plugin.onnx 
+--max_num_keypoints 1024
+
+----------
+
+build mono superpoint trt engine
+
+/usr/src/tensorrt/bin/trtexec 
+--onnx=./onnx_files/superpoint.onnx 
+--saveEngine=./trt_engine_files/superpoint.mono.480x640.fp32.noDLA.engine 
+--minShapes=image:1x1x480x640 
+--optShapes=image:1x1x480x640 
+--maxShapes=image:1x1x480x640 
+--useCudaGraph 
+--verbose 
+--warmUp=1000 
+--iterations=100 
+--duration=100 
+> ./trt_engine_files/superpoint.mono.480x640.fp32.noDLA.engine.txt
+
+/usr/src/tensorrt/bin/trtexec 
+--onnx=./onnx_files/superpoint.onnx 
+--saveEngine=./trt_engine_files/superpoint.mono.480x640.fp16.noDLA.engine 
+--minShapes=image:1x1x480x640 
+--optShapes=image:1x1x480x640 
+--maxShapes=image:1x1x480x640 
+--fp16 
+--precisionConstraints=obey 
+--layerPrecisions=*:fp16 
+--useCudaGraph 
+--verbose 
+--warmUp=1000 
+--iterations=100 
+--duration=100 
+> ./trt_engine_files/superpoint.mono.480x640.fp16.noDLA.engine.txt
+
+----------
+
+build stereo superpoint trt engine
+
+/usr/src/tensorrt/bin/trtexec 
+--onnx=./onnx_files/superpoint.onnx 
+--saveEngine=./trt_engine_files/superpoint.stereo.480x640.fp32.noDLA.engine 
+--minShapes=image:2x1x480x640 
+--optShapes=image:2x1x480x640 
+--maxShapes=image:2x1x480x640 
+--useCudaGraph 
+--verbose 
+--warmUp=1000 
+--iterations=100 
+--duration=100 
+> ./trt_engine_files/superpoint.stereo.480x640.fp32.noDLA.engine.txt
+
+/usr/src/tensorrt/bin/trtexec 
+--onnx=./onnx_files/superpoint.onnx 
+--saveEngine=./trt_engine_files/superpoint.stereo.480x640.fp16.noDLA.engine 
+--minShapes=image:2x1x480x640 
+--optShapes=image:2x1x480x640 
+--maxShapes=image:2x1x480x640 
+--fp16 
+--precisionConstraints=obey 
+--layerPrecisions=*:fp16 
+--useCudaGraph 
+--verbose 
+--warmUp=1000 
+--iterations=100 
+--duration=100 
+> ./trt_engine_files/superpoint.stereo.480x640.fp16.noDLA.engine.txt
+
+----------
+
+build lightglue trt engine with plugin
+
+/usr/src/tensorrt/bin/trtexec 
+--onnx=./onnx_files/lightglue_for_superpoint_with_plugin.onnx 
+--saveEngine=./trt_engine_files/lightglue_for_superpoint_with_plugin.1_1024_1024.fp32.noDLA.engine 
+--minShapes=keypoints_0:1x1x2,keypoints_1:1x1x2,descriptors_0:1x1x256,descriptors_1:1x1x256 
+--optShapes=keypoints_0:1x1024x2,keypoints_1:1x1024x2,descriptors_0:1x1024x256,descriptors_1:1x1024x256 
+--maxShapes=keypoints_0:1x1024x2,keypoints_1:1x1024x2,descriptors_0:1x1024x256,descriptors_1:1x1024x256 
+--useCudaGraph 
+--verbose 
+--plugins=./lightglue_attention_plugin/build/liblightglue_attention_plugin.so 
+--warmUp=1000 
+--iterations=100 
+--duration=100 
+> ./trt_engine_files/lightglue_for_superpoint_with_plugin.1_1024_1024.fp32.noDLA.engine.txt
+
+/usr/src/tensorrt/bin/trtexec 
+--onnx=./onnx_files/lightglue_for_superpoint_with_plugin.onnx 
+--saveEngine=./trt_engine_files/lightglue_for_superpoint_with_plugin.1_1024_1024.fp16.noDLA.engine 
+--minShapes=keypoints_0:1x1x2,keypoints_1:1x1x2,descriptors_0:1x1x256,descriptors_1:1x1x256 
+--optShapes=keypoints_0:1x1024x2,keypoints_1:1x1024x2,descriptors_0:1x1024x256,descriptors_1:1x1024x256 
+--maxShapes=keypoints_0:1x1024x2,keypoints_1:1x1024x2,descriptors_0:1x1024x256,descriptors_1:1x1024x256 
+--fp16 
+--precisionConstraints=obey 
+--layerPrecisions=*:fp16 
+--useCudaGraph 
+--verbose 
+--plugins=./lightglue_attention_plugin/build/liblightglue_attention_plugin.so 
+--warmUp=1000 
+--iterations=100 
+--duration=100 
+> ./trt_engine_files/lightglue_for_superpoint_with_plugin.1_1024_1024.fp16.noDLA.engine.txt
+
+----------
+
+build lightglue trt engine no plugin
+
+/usr/src/tensorrt/bin/trtexec 
+--onnx=./onnx_files/lightglue_for_superpoint_no_plugin.onnx 
+--saveEngine=./trt_engine_files/lightglue_for_superpoint_no_plugin.1_1024_1024.fp32.noDLA.engine 
+--minShapes=keypoints_0:1x1x2,keypoints_1:1x1x2,descriptors_0:1x1x256,descriptors_1:1x1x256 
+--optShapes=keypoints_0:1x1024x2,keypoints_1:1x1024x2,descriptors_0:1x1024x256,descriptors_1:1x1024x256 
+--maxShapes=keypoints_0:1x1024x2,keypoints_1:1x1024x2,descriptors_0:1x1024x256,descriptors_1:1x1024x256 
+--useCudaGraph 
+--verbose 
+--warmUp=1000 
+--iterations=100 
+--duration=100 
+> ./trt_engine_files/lightglue_for_superpoint_no_plugin.1_1024_1024.fp32.noDLA.engine.txt
+
+/usr/src/tensorrt/bin/trtexec 
+--onnx=./onnx_files/lightglue_for_superpoint_no_plugin.onnx 
+--saveEngine=./trt_engine_files/lightglue_for_superpoint_no_plugin.1_1024_1024.fp16.noDLA.engine 
+--minShapes=keypoints_0:1x1x2,keypoints_1:1x1x2,descriptors_0:1x1x256,descriptors_1:1x1x256 
+--optShapes=keypoints_0:1x1024x2,keypoints_1:1x1024x2,descriptors_0:1x1024x256,descriptors_1:1x1024x256 
+--maxShapes=keypoints_0:1x1024x2,keypoints_1:1x1024x2,descriptors_0:1x1024x256,descriptors_1:1x1024x256 
+--fp16 
+--precisionConstraints=obey 
+--layerPrecisions=*:fp16 
+--useCudaGraph 
+--verbose 
+--warmUp=1000 
+--iterations=100 
+--duration=100 
+> ./trt_engine_files/lightglue_for_superpoint_no_plugin.1_1024_1024.fp16.noDLA.engine.txt
+
+----------
+
+./demo_0 
+${PWD}/../../trt_engine_files/superpoint.mono.480x640.fp32.noDLA.engine 
+${PWD}/../../trt_engine_files/lightglue_for_superpoint_with_plugin.1_1024_1024.fp32.noDLA.engine 
+${PWD}/../../lightglue_attention_plugin/build/liblightglue_attention_plugin.so 
+${PWD}/../../image/freiburg_sequence/1341847980.722988.png 
+${PWD}/../../image/freiburg_sequence/1341847981.726650.png 
+${PWD}/../../matches
+
+./demo_0 
+/root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT-ScratchBook/trt_engine_files/superpoint.mono.480x640.fp32.noDLA.engine 
+${PWD}/../../trt_engine_files/lightglue_for_superpoint_with_plugin.1_1024_1024.fp32.noDLA.engine 
+${PWD}/../../lightglue_attention_plugin/build/liblightglue_attention_plugin.so 
+${PWD}/../../image/freiburg_sequence/1341847980.722988.png 
+${PWD}/../../image/freiburg_sequence/1341847981.726650.png 
+${PWD}/../../matches
+
+./main_mono 
+/root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT-ScratchBook/trt_engine_files/superpoint.mono.480x640.fp32.noDLA.engine 
+/root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT-ScratchBook/trt_engine_files/lightglue_for_superpoint.1_1024_1024.fp32.noDLA.engine 
+${PWD}/../../lightglue_attention_plugin/build/liblightglue_attention_plugin.so 
+${PWD}/../../image/freiburg_sequence
+
