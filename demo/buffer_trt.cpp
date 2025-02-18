@@ -81,9 +81,6 @@ void BufferTRT::Set(
         m_buffer_numel = m_cur_buffer_numel;
         m_buffer_dtype = m_cur_buffer_dtype;
     }
-
-    // printf("m_buffer_numel : "); for (int i = 0; i < m_buffer_numel.size(); ++i) { printf("%d ", m_buffer_numel[i]); } printf("\n");
-    // printf("m_buffer_dtype : "); for (int i = 0; i < m_buffer_dtype.size(); ++i) { printf("%d ", m_buffer_dtype[i]); } printf("\n");
 }
 
 std::vector<void*> BufferTRT::GetDeviceBindings() const {
