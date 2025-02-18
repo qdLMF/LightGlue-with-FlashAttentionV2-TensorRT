@@ -8,12 +8,11 @@
 
 #include <cuda.h>
 #include <cuda_runtime_api.h>
-// #include <cuda_fp16.h>
 
 #include <cute/tensor.hpp>
 
 #include <torch/torch.h>
-#include <c10/cuda/CUDAStream.h>
+// #include <c10/cuda/CUDAStream.h>
 
 #include "./attention_headdim_64_fp16in_fp16out.cuh"
 
