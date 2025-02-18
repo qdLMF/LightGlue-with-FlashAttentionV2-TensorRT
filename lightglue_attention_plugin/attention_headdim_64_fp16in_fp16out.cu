@@ -8,7 +8,7 @@
 
 #include <cuda.h>
 #include <cuda_runtime_api.h>
-#include <cuda_fp16.h>
+// #include <cuda_fp16.h>
 
 #include <cute/tensor.hpp>
 
@@ -19,7 +19,7 @@
 
 
 using namespace cute;
-using namespace torch::indexing;
+// using namespace torch::indexing;
 
 namespace AttentionHeadDim64 {
 

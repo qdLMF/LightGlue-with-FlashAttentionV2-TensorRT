@@ -18,7 +18,7 @@
 
 
 using namespace cute;
-using namespace torch::indexing;
+// using namespace torch::indexing;
 
 namespace AttentionHeadDim64 {
 
