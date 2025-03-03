@@ -5,7 +5,7 @@
 #include "./lightglue_trt.h"
 
 
-#define LIGHTGLUE_SCORE_THRESHOLD 0.1f
+// #define LIGHTGLUE_SCORE_THRESHOLD 0.2f
 
 LightGlueTRT::LightGlueTRT(
     const std::string& trt_engine_file_path, 
@@ -53,44 +53,120 @@ LightGlueTRT::LightGlueTRT(
     m_bindings_name_to_index["lightglue_scores"] = m_engine->getBindingIndex("lightglue_scores");
     m_bindings_name_to_index["lightglue_descriptors_0"] = m_engine->getBindingIndex("lightglue_descriptors_0");
     m_bindings_name_to_index["lightglue_descriptors_1"] = m_engine->getBindingIndex("lightglue_descriptors_1");
+
+    cudaStreamCreateWithFlags(&cuda_stream, cudaStreamNonBlocking);
+}
+
+LightGlueTRT::~LightGlueTRT() {
+    // cudaStreamSynchronize(cuda_stream);
+    // cudaStreamDestroy(cuda_stream);
+    // cudaGraphDestroy(cuda_graph);
+    // cudaGraphExecDestroy(cuda_graph_exec);
+}
+
+void LightGlueTRT::SetMaxInputShape(const std::unordered_map<std::string, std::vector<int64_t>>& max_input_shape) {
+    assert(max_input_shape.find("keypoints_0") != max_input_shape.end());
+    assert(max_input_shape.at("keypoints_0").size() == 3);
+    assert(
+        max_input_shape.at("keypoints_0")[0] == 1    && 
+        max_input_shape.at("keypoints_0")[1] <= 1024 &&
+        max_input_shape.at("keypoints_0")[2] == 2
+    );
+
+    assert(max_input_shape.find("keypoints_1") != max_input_shape.end());
+    assert(max_input_shape.at("keypoints_1").size() == 3);
+    assert(
+        max_input_shape.at("keypoints_1")[0] == 1    && 
+        max_input_shape.at("keypoints_1")[1] <= 1024 &&
+        max_input_shape.at("keypoints_1")[2] == 2
+    );
+
+    assert(max_input_shape.find("descriptors_0") != max_input_shape.end());
+    assert(max_input_shape.at("descriptors_0").size() == 3);
+    assert(
+        max_input_shape.at("descriptors_0")[0] == 1    && 
+        max_input_shape.at("descriptors_0")[1] <= 1024 &&
+        max_input_shape.at("descriptors_0")[2] == 256
+    );
+
+    assert(max_input_shape.find("descriptors_1") != max_input_shape.end());
+    assert(max_input_shape.at("descriptors_1").size() == 3);
+    assert(
+        max_input_shape.at("descriptors_1")[0] == 1    && 
+        max_input_shape.at("descriptors_1")[1] <= 1024 &&
+        max_input_shape.at("descriptors_1")[2] == 256
+    );
+
+    assert(
+        max_input_shape.at("keypoints_0")[1] == max_input_shape.at("descriptors_0")[1] && 
+        max_input_shape.at("keypoints_1")[1] == max_input_shape.at("descriptors_1")[1]
+    );
+
+    m_max_input_shape = max_input_shape;
+    m_context->setBindingDimensions(
+        m_bindings_name_to_index.at("keypoints_0"), 
+        IntVectorToDims(m_max_input_shape.at("keypoints_0"))
+    );
+    m_context->setBindingDimensions(
+        m_bindings_name_to_index.at("keypoints_1"), 
+        IntVectorToDims(m_max_input_shape.at("keypoints_1"))
+    );
+    m_context->setBindingDimensions(
+        m_bindings_name_to_index.at("descriptors_0"), 
+        IntVectorToDims(m_max_input_shape.at("descriptors_0"))
+    );
+    m_context->setBindingDimensions(
+        m_bindings_name_to_index.at("descriptors_1"), 
+        IntVectorToDims(m_max_input_shape.at("descriptors_1"))
+    );
+
+    m_buffer.Set(
+        m_engine,
+        0,
+        m_context.get()
+    );
+    
+    m_max_output_shape["lightglue_descriptors_0"] = DimsToIntVector(m_context->getBindingDimensions(m_bindings_name_to_index.at("lightglue_descriptors_0")));
+    m_max_output_shape["lightglue_descriptors_1"] = DimsToIntVector(m_context->getBindingDimensions(m_bindings_name_to_index.at("lightglue_descriptors_1")));
+    m_max_output_shape["lightglue_scores"]        = DimsToIntVector(m_context->getBindingDimensions(m_bindings_name_to_index.at("lightglue_scores")));
 }
 
 void LightGlueTRT::SetInputShape(const std::unordered_map<std::string, std::vector<int64_t>>& input_shape) {
     assert(input_shape.find("keypoints_0") != input_shape.end());
-    assert(input_shape.find("keypoints_0")->second.size() == 3);
+    assert(input_shape.at("keypoints_0").size() == 3);
     assert(
-        input_shape.find("keypoints_0")->second[0] == 1    && 
-        input_shape.find("keypoints_0")->second[1] <= 1024 &&
-        input_shape.find("keypoints_0")->second[2] == 2
+        input_shape.at("keypoints_0")[0] == m_max_input_shape.at("keypoints_0")[0] && 
+        input_shape.at("keypoints_0")[1] <= m_max_input_shape.at("keypoints_0")[1] &&
+        input_shape.at("keypoints_0")[2] == m_max_input_shape.at("keypoints_0")[2]
     );
 
     assert(input_shape.find("keypoints_1") != input_shape.end());
-    assert(input_shape.find("keypoints_1")->second.size() == 3);
+    assert(input_shape.at("keypoints_1").size() == 3);
     assert(
-        input_shape.find("keypoints_1")->second[0] == 1    && 
-        input_shape.find("keypoints_1")->second[1] <= 1024 &&
-        input_shape.find("keypoints_1")->second[2] == 2
+        input_shape.at("keypoints_1")[0] == m_max_input_shape.at("keypoints_1")[0] && 
+        input_shape.at("keypoints_1")[1] <= m_max_input_shape.at("keypoints_1")[1] &&
+        input_shape.at("keypoints_1")[2] == m_max_input_shape.at("keypoints_1")[2]
     );
 
     assert(input_shape.find("descriptors_0") != input_shape.end());
-    assert(input_shape.find("descriptors_0")->second.size() == 3);
+    assert(input_shape.at("descriptors_0").size() == 3);
     assert(
-        input_shape.find("descriptors_0")->second[0] == 1    && 
-        input_shape.find("descriptors_0")->second[1] <= 1024 &&
-        input_shape.find("descriptors_0")->second[2] == 256
+        input_shape.at("descriptors_0")[0] == m_max_input_shape.at("descriptors_0")[0] && 
+        input_shape.at("descriptors_0")[1] <= m_max_input_shape.at("descriptors_0")[1] &&
+        input_shape.at("descriptors_0")[2] == m_max_input_shape.at("descriptors_0")[2]
     );
 
     assert(input_shape.find("descriptors_1") != input_shape.end());
-    assert(input_shape.find("descriptors_1")->second.size() == 3);
+    assert(input_shape.at("descriptors_1").size() == 3);
     assert(
-        input_shape.find("descriptors_1")->second[0] == 1    && 
-        input_shape.find("descriptors_1")->second[1] <= 1024 &&
-        input_shape.find("descriptors_1")->second[2] == 256
+        input_shape.at("descriptors_1")[0] == m_max_input_shape.at("descriptors_1")[0] && 
+        input_shape.at("descriptors_1")[1] <= m_max_input_shape.at("descriptors_1")[1] &&
+        input_shape.at("descriptors_1")[2] == m_max_input_shape.at("descriptors_1")[2]
     );
 
     assert(
-        input_shape.find("keypoints_0")->second[1] == input_shape.find("descriptors_0")->second[1] && 
-        input_shape.find("keypoints_1")->second[1] == input_shape.find("descriptors_1")->second[1]
+        input_shape.at("keypoints_0")[1] == input_shape.at("descriptors_0")[1] && 
+        input_shape.at("keypoints_1")[1] == input_shape.at("descriptors_1")[1]
     );
 
     m_input_shape = input_shape;
@@ -120,6 +196,37 @@ void LightGlueTRT::SetInputShape(const std::unordered_map<std::string, std::vect
     m_output_shape["lightglue_descriptors_0"] = DimsToIntVector(m_context->getBindingDimensions(m_bindings_name_to_index.at("lightglue_descriptors_0")));
     m_output_shape["lightglue_descriptors_1"] = DimsToIntVector(m_context->getBindingDimensions(m_bindings_name_to_index.at("lightglue_descriptors_1")));
     m_output_shape["lightglue_scores"]        = DimsToIntVector(m_context->getBindingDimensions(m_bindings_name_to_index.at("lightglue_scores")));
+}
+
+void LightGlueTRT::SetInputAddress() {
+    m_context->setTensorAddress(
+        "keypoints_0", 
+        m_buffer.GetDeviceBuffer(m_bindings_name_to_index.at("keypoints_0"))
+    );
+    m_context->setTensorAddress(
+        "keypoints_1", 
+        m_buffer.GetDeviceBuffer(m_bindings_name_to_index.at("keypoints_1"))
+    );
+    m_context->setTensorAddress(
+        "descriptors_0", 
+        m_buffer.GetDeviceBuffer(m_bindings_name_to_index.at("descriptors_0"))
+    );
+    m_context->setTensorAddress(
+        "descriptors_1", 
+        m_buffer.GetDeviceBuffer(m_bindings_name_to_index.at("descriptors_1"))
+    );
+    m_context->setTensorAddress(
+        "lightglue_descriptors_0", 
+        m_buffer.GetDeviceBuffer(m_bindings_name_to_index.at("lightglue_descriptors_0"))
+    );
+    m_context->setTensorAddress(
+        "lightglue_descriptors_1", 
+        m_buffer.GetDeviceBuffer(m_bindings_name_to_index.at("lightglue_descriptors_1"))
+    );
+    m_context->setTensorAddress(
+        "lightglue_scores", 
+        m_buffer.GetDeviceBuffer(m_bindings_name_to_index.at("lightglue_scores"))
+    );
 }
 
 void LightGlueTRT::CopyInputTensor(const std::unordered_map<std::string, torch::Tensor>& input_tensor) {
@@ -165,9 +272,23 @@ void LightGlueTRT::CopyInputTensor(const std::unordered_map<std::string, torch::
     );
 }
 
-std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> LightGlueTRT::Forward() {
-    assert(m_context->executeV2(m_buffer.GetDeviceBindings().data()));
+// void LightGlueTRT::Forward() {
+//     assert(m_context->executeV2(m_buffer.GetDeviceBindings().data()));  // using default stream
+// }
 
+// void LightGlueTRT::Forward() {
+//     assert(m_context->enqueueV2(m_buffer.GetDeviceBindings().data(), cuda_stream, nullptr));
+// }
+
+void LightGlueTRT::Forward() {
+    assert(m_context->enqueueV3(cuda_stream));  // have to call m_context->setTensorAddress() before
+}
+
+// void LightGlueTRT::Forward(const cudaStream_t& cuda_stream) {
+//     assert(m_context->enqueueV3(cuda_stream));  // have to call m_context->setTensorAddress() before
+// }
+
+std::tuple<int, torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> LightGlueTRT::PostProcess(float threshold) {
     torch::NoGradGuard torch_no_grad;
 
     m_descriptors_0_fp32_cuda = torch::from_blob(
@@ -196,7 +317,7 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Te
     m_linear_indices_0_int64_cuda = torch::arange(
         m_max_scores_indices_0_int64_cuda.size(0), 
         torch::TensorOptions().dtype(torch::kInt64).layout(torch::kStrided).device(torch::kCUDA).requires_grad(false)
-    );  // pass
+    );
 
     m_temp_int64_cuda = torch::gather(m_max_scores_indices_1_int64_cuda, 0, m_max_scores_indices_0_int64_cuda);
 
@@ -205,7 +326,7 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Te
     m_max_scores_values_0_fp32_cuda = torch::exp(m_max_scores_values_0_fp32_cuda);
     m_zeros_fp32_cuda = torch::zeros_like(m_max_scores_values_0_fp32_cuda);
     m_mutual_max_scores_fp32_cuda = torch::where(m_mutual_max_scores_flag_bool_cuda, m_max_scores_values_0_fp32_cuda, m_zeros_fp32_cuda);
-    m_mutual_max_scores_mask_bool_cuda = m_mutual_max_scores_fp32_cuda > LIGHTGLUE_SCORE_THRESHOLD;
+    m_mutual_max_scores_mask_bool_cuda = m_mutual_max_scores_fp32_cuda > threshold;
 
     m_match_indices_0_int64_cuda = torch::masked_select(m_temp_int64_cuda, m_mutual_max_scores_mask_bool_cuda);
     m_match_indices_1_int64_cuda = torch::gather(m_max_scores_indices_0_int64_cuda, 0, m_match_indices_0_int64_cuda);
@@ -213,6 +334,7 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Te
     m_match_scores_fp32_cuda = torch::gather(m_mutual_max_scores_fp32_cuda, 0, m_match_indices_0_int64_cuda);
 
     return std::make_tuple(
+        int(m_match_scores_fp32_cuda.size(0)), 
         m_descriptors_0_fp32_cuda.clone().contiguous(), 
         m_descriptors_1_fp32_cuda.clone().contiguous(), 
         m_scores_fp32_cuda.clone().contiguous(), 
@@ -222,4 +344,28 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Te
     );
 }
 
+void LightGlueTRT::RecordCUDAGraph() {
+    // cudaStreamSynchronize(cuda_stream);
+    cudaDeviceSynchronize();
+    // cudaStreamCaptureModeGlobal does not work
+    // cudaStreamCaptureModeThreadLocal does not work
+    // cudaStreamCaptureModeRelaxed works
+    // engine file might have some prohibited operations such as cudaMalloc()
+    cudaStreamBeginCapture(cuda_stream, cudaStreamCaptureModeRelaxed);
+
+    assert(m_context->enqueueV3(cuda_stream));
+
+    cudaStreamEndCapture(cuda_stream, &cuda_graph);
+    cudaGraphInstantiate(&cuda_graph_exec, cuda_graph, nullptr, nullptr, 0);
+    // cudaStreamSynchronize(cuda_stream);
+    cudaDeviceSynchronize();
+}
+
+void LightGlueTRT::LaunchCUDAGraph() {
+    cudaGraphLaunch(cuda_graph_exec, cuda_stream);
+}
+
+void LightGlueTRT::Sync() {
+    cudaStreamSynchronize(cuda_stream);
+}
 

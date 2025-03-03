@@ -1,6 +1,13 @@
 demo/build
+demo/backup
 lightglue_attention_plugin/build
 lightglue_pytorch_no_plugin/__pycache__
 lightglue_pytorch_with_plugin/__pycache__
 demo/3rdparty/tensorrtbuffer/lib/*
 lightglue_attention_plugin/change_names.txt
+demo/Untitled.txt
+matches_demo_mono_1
+lightglue_attention_plugin/backup
+lightglue_attention_plugin/backup_0
+lightglue_attention_plugin/backup_2
+

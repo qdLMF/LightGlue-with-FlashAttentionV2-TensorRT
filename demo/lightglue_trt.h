@@ -34,9 +34,18 @@ public :
         tensorrt_log::Logger& gLogger
     );
 
+    ~LightGlueTRT();
+
+    void SetMaxInputShape(const std::unordered_map<std::string, std::vector<int64_t>>& max_input_shape);
     void SetInputShape(const std::unordered_map<std::string, std::vector<int64_t>>& input_shape);
+    void SetInputAddress();
     void CopyInputTensor(const std::unordered_map<std::string, torch::Tensor>& input_tensor);
-    std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> Forward();
+    void Forward();
+    void Forward(const cudaStream_t& cuda_stream);
+    std::tuple<int, torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> PostProcess(float threshold);
+    void RecordCUDAGraph();
+    void LaunchCUDAGraph();
+    void Sync();
 
 private : 
     std::string m_trt_engine_file_path;
@@ -48,6 +57,8 @@ private :
 
     BufferTRT m_buffer;
 
+    std::unordered_map<std::string, std::vector<int64_t>> m_max_input_shape;
+    std::unordered_map<std::string, std::vector<int64_t>> m_max_output_shape;
     std::unordered_map<std::string, std::vector<int64_t>> m_input_shape;
     std::unordered_map<std::string, std::vector<int64_t>> m_output_shape;
 
@@ -80,6 +91,11 @@ private :
     torch::Tensor m_match_indices_1_int64_cuda;
     torch::Tensor m_match_indices_int64_cuda;
     torch::Tensor m_match_scores_fp32_cuda;
+
+public : 
+    cudaStream_t cuda_stream;
+    cudaGraph_t cuda_graph;
+    cudaGraphExec_t cuda_graph_exec;
 };
 
 #endif

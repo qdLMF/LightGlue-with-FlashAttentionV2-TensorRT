@@ -309,8 +309,8 @@ __global__ void attention_kernel_headdim_64_no_remainder_fp16in_fp32out(    // "
     auto smem_V_tile_fp16             = make_tensor(make_smem_ptr(smem_V_ptr_fp16), KernelConfigHeadDim64_FP16IN_FP32OUT::SmemLayoutV{});
     auto smem_VtNoSwizzle_tile_fp16   = make_tensor(make_smem_ptr(smem_V_ptr_fp16), KernelConfigHeadDim64_FP16IN_FP32OUT::SmemLayoutVtransposedNoSwizzle{});
     auto smem_VtWithSwizzle_tile_fp16 = make_tensor(make_smem_ptr(smem_V_ptr_fp16), KernelConfigHeadDim64_FP16IN_FP32OUT::SmemLayoutVtransposedWithSwizzle{});
-    auto smem_S_tile_fp16             = make_tensor(make_smem_ptr(smem_K_ptr_fp16), KernelConfigHeadDim64_FP16IN_FP32OUT::SmemLayoutK{});
-    auto smem_P_tile_fp16             = make_tensor(make_smem_ptr(smem_K_ptr_fp16), KernelConfigHeadDim64_FP16IN_FP32OUT::SmemLayoutK{});
+    auto smem_S_tile_fp16             = make_tensor(make_smem_ptr(smem_Q_ptr_fp16), KernelConfigHeadDim64_FP16IN_FP32OUT::SmemLayoutQ{});
+    auto smem_P_tile_fp16             = make_tensor(make_smem_ptr(smem_Q_ptr_fp16), KernelConfigHeadDim64_FP16IN_FP32OUT::SmemLayoutQ{});
     auto smem_O_tile_fp32             = make_tensor(make_smem_ptr((FP32*)smem_Q_ptr_fp16), KernelConfigHeadDim64_FP16IN_FP32OUT::SmemLayoutO{});
 
     KernelConfigHeadDim64_FP16IN_FP32OUT::G2SCopyQ g2s_tiled_copy_Q;
@@ -334,8 +334,8 @@ __global__ void attention_kernel_headdim_64_no_remainder_fp16in_fp32out(    // "
     auto mma_rmem_Q_tile_fp16_frag = thr_mma.partition_fragment_A(smem_Q_tile_fp16);
     auto mma_rmem_K_tile_fp16_frag = thr_mma.partition_fragment_B(smem_K_tile_fp16(_, _, 0));
     auto mma_rmem_V_tile_fp16_frag = thr_mma.partition_fragment_B(smem_VtNoSwizzle_tile_fp16(_, _, 0));
-    auto mma_rmem_S_tile_fp16_frag = thr_mma.partition_fragment_C(smem_S_tile_fp16(_, _, 0));
-    auto mma_rmem_P_tile_fp16_frag = thr_mma.partition_fragment_A(smem_P_tile_fp16(_, _, 0));
+    auto mma_rmem_S_tile_fp16_frag = thr_mma.partition_fragment_C(smem_S_tile_fp16);
+    auto mma_rmem_P_tile_fp16_frag = thr_mma.partition_fragment_A(smem_P_tile_fp16);
     auto mma_rmem_O_tile_fp32_frag = thr_mma.partition_fragment_C(smem_O_tile_fp32);
     auto mma_rmem_S_tile_fp32_frag = make_tensor_like<FP32>(mma_rmem_S_tile_fp16_frag);
 
@@ -622,9 +622,9 @@ __global__ void attention_kernel_headdim_64_no_remainder_fp16in_fp32out(    // "
         // smem_row_sum[0][:] + smem_row_sum[1][:] is now row_sum
         // smem_l[:]                               is now lij
 
-        cute::copy(mma_rmem_S_tile_fp16_frag, mma_smem_S_tile_fp16_view(_, _, _, (ver_idx % KernelConfigHeadDim64_FP16IN_FP32OUT::NUM_STAGES)));
-        __syncthreads();
-        cute::copy(s2r_tiled_copy_P, s2r_smem_P_tile_fp16_view(_, _, _, (ver_idx % KernelConfigHeadDim64_FP16IN_FP32OUT::NUM_STAGES)), mma_rmem_P_tile_fp16_frag);
+        cute::copy(mma_rmem_S_tile_fp16_frag, mma_smem_S_tile_fp16_view);
+        // __syncthreads(); // is neccessary
+        // cute::copy(s2r_tiled_copy_P, s2r_smem_P_tile_fp16_view, mma_rmem_P_tile_fp16_frag);
 
         // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -639,6 +639,7 @@ __global__ void attention_kernel_headdim_64_no_remainder_fp16in_fp32out(    // "
             s2r_smem_V_tile_fp16_view(_, _, _, (ver_idx % KernelConfigHeadDim64_FP16IN_FP32OUT::NUM_STAGES)), 
             mma_rmem_V_tile_fp16_frag
         );
+        cute::copy(s2r_tiled_copy_P, s2r_smem_P_tile_fp16_view, mma_rmem_P_tile_fp16_frag);
 
         #pragma unroll
         for (int idx_1 = 0; idx_1 < cute::size<1>(mma_rmem_O_tile_fp32_frag); idx_1++) {

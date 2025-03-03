@@ -5,8 +5,8 @@
 #include "./superpoint_mono_trt.h"
 
 
-#define SUPERPOINT_MAX_NUM_KEYPOINTS  1024
-#define SUPERPOINT_KEYPOINT_THRESHOLD 0.00005f
+// #define SUPERPOINT_MAX_NUM_KEYPOINTS  1024
+// #define SUPERPOINT_KEYPOINT_THRESHOLD 0.00005f
 
 SuperPointMonoTRT::SuperPointMonoTRT(
     const std::string& trt_engine_file_path,
@@ -43,16 +43,51 @@ SuperPointMonoTRT::SuperPointMonoTRT(
     m_bindings_name_to_index["image"]       = m_engine->getBindingIndex("image");
     m_bindings_name_to_index["scores"]      = m_engine->getBindingIndex("scores");
     m_bindings_name_to_index["descriptors"] = m_engine->getBindingIndex("descriptors");
+
+    cudaStreamCreateWithFlags(&cuda_stream, cudaStreamNonBlocking);
+}
+
+SuperPointMonoTRT::~SuperPointMonoTRT() {
+    // cudaStreamSynchronize(cuda_stream);
+    // cudaStreamDestroy(cuda_stream);
+    // cudaGraphDestroy(cuda_graph);
+    // cudaGraphExecDestroy(cuda_graph_exec);
+}
+
+void SuperPointMonoTRT::SetMaxInputShape(const std::unordered_map<std::string, std::vector<int64_t>>& max_input_shape) {
+    assert(max_input_shape.find("image") != max_input_shape.end());
+    assert(max_input_shape.at("image").size() == 4);
+    assert(
+        max_input_shape.at("image")[0] == 1    && 
+        max_input_shape.at("image")[1] == 1    &&
+        max_input_shape.at("image")[2] == 480  &&
+        max_input_shape.at("image")[3] >= 640
+    );
+
+    m_max_input_shape = max_input_shape;
+    m_context->setBindingDimensions(
+        m_bindings_name_to_index.at("image"), 
+        IntVectorToDims(m_max_input_shape.at("image"))
+    );
+
+    m_buffer.Set(
+        m_engine,
+        0,
+        m_context.get()
+    );
+
+    m_max_output_shape["scores"]      = DimsToIntVector(m_context->getBindingDimensions(m_bindings_name_to_index.at("scores")));
+    m_max_output_shape["descriptors"] = DimsToIntVector(m_context->getBindingDimensions(m_bindings_name_to_index.at("descriptors")));
 }
 
 void SuperPointMonoTRT::SetInputShape(const std::unordered_map<std::string, std::vector<int64_t>>& input_shape) {
     assert(input_shape.find("image") != input_shape.end());
-    assert(input_shape.find("image")->second.size() == 4);
+    assert(input_shape.at("image").size() == 4);
     assert(
-        input_shape.find("image")->second[0] == 1    && 
-        input_shape.find("image")->second[1] == 1    &&
-        input_shape.find("image")->second[2] == 480  &&
-        input_shape.find("image")->second[3] >= 640
+        input_shape.at("image")[0] == m_max_input_shape.at("image")[0]  && 
+        input_shape.at("image")[1] == m_max_input_shape.at("image")[1]  &&
+        input_shape.at("image")[2] <= m_max_input_shape.at("image")[2]  &&
+        input_shape.at("image")[3] <= m_max_input_shape.at("image")[3]
     );
 
     m_input_shape = input_shape;
@@ -67,8 +102,23 @@ void SuperPointMonoTRT::SetInputShape(const std::unordered_map<std::string, std:
         m_context.get()
     );
 
-    m_output_shape["scores"]      = DimsToIntVector(m_context->getBindingDimensions(1));
-    m_output_shape["descriptors"] = DimsToIntVector(m_context->getBindingDimensions(2));
+    m_output_shape["scores"]      = DimsToIntVector(m_context->getBindingDimensions(m_bindings_name_to_index.at("scores")));
+    m_output_shape["descriptors"] = DimsToIntVector(m_context->getBindingDimensions(m_bindings_name_to_index.at("descriptors")));
+}
+
+void SuperPointMonoTRT::SetInputAddress() {
+    m_context->setTensorAddress(
+        "image", 
+        m_buffer.GetDeviceBuffer(m_bindings_name_to_index.at("image"))
+    );
+    m_context->setTensorAddress(
+        "scores", 
+        m_buffer.GetDeviceBuffer(m_bindings_name_to_index.at("scores"))
+    );
+    m_context->setTensorAddress(
+        "descriptors", 
+        m_buffer.GetDeviceBuffer(m_bindings_name_to_index.at("descriptors"))
+    );
 }
 
 void SuperPointMonoTRT::CopyInputTensor(const std::unordered_map<std::string, torch::Tensor>& input_tensor) {
@@ -84,9 +134,23 @@ void SuperPointMonoTRT::CopyInputTensor(const std::unordered_map<std::string, to
     );
 }
 
-std::tuple<torch::Tensor, torch::Tensor, torch::Tensor> SuperPointMonoTRT::Forward() {
-    assert(m_context->executeV2(m_buffer.GetDeviceBindings().data()));
+// void SuperPointMonoTRT::Forward() {
+//     assert(m_context->executeV2(m_buffer.GetDeviceBindings().data()));  // using default stream
+// }
 
+// void SuperPointMonoTRT::Forward() {
+//     assert(m_context->enqueueV2(m_buffer.GetDeviceBindings().data(), cuda_stream, nullptr));
+// }
+
+void SuperPointMonoTRT::Forward() {
+    assert(m_context->enqueueV3(cuda_stream));  // have to call m_context->setTensorAddress() before
+}
+
+// void SuperPointMonoTRT::Forward(const cudaStream_t& cuda_stream) {
+//     assert(m_context->enqueueV3(cuda_stream));  // have to call m_context->setTensorAddress() before
+// }
+
+std::tuple<int, torch::Tensor, torch::Tensor, torch::Tensor> SuperPointMonoTRT::PostProcess(float threshold, int max_num_keypoints) {
     torch::NoGradGuard torch_no_grad;
 
     m_scores_fp32_cuda = torch::from_blob(
@@ -129,7 +193,7 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor> SuperPointMonoTRT::Forwa
         -1.0f
     );
 
-    m_mask_gt_threshold_bool_cuda = torch::where(torch::gt(m_scores_fp32_cuda, SUPERPOINT_KEYPOINT_THRESHOLD), 1, 0);    // all-zero m_scores_fp32_cuda is impossible
+    m_mask_gt_threshold_bool_cuda = torch::where(torch::gt(m_scores_fp32_cuda, threshold), 1, 0);       // all-zero m_scores_fp32_cuda is impossible
     m_keypoints_gt_threshold_int32_cuda = m_mask_gt_threshold_bool_cuda.nonzero().to(torch::kInt32);    // r, c
 
     m_scores_gt_threshold_fp32_cuda = m_scores_fp32_cuda.view(-1).index_select(
@@ -137,7 +201,16 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor> SuperPointMonoTRT::Forwa
         m_mask_gt_threshold_bool_cuda.view(-1).nonzero().squeeze()
     );
 
-    m_k = m_scores_gt_threshold_fp32_cuda.size(0) < SUPERPOINT_MAX_NUM_KEYPOINTS ? m_scores_gt_threshold_fp32_cuda.size(0) : SUPERPOINT_MAX_NUM_KEYPOINTS;
+    if (m_scores_gt_threshold_fp32_cuda.size(0) == 0) {
+        return std::make_tuple(
+            int(0), 
+            m_keypoints_topk_int32_cuda.clone().contiguous(), 
+            m_keypoints_topk_normalized_fp32_cuda.clone().contiguous(), 
+            m_descriptors_topk_fp32_cuda.clone().contiguous()
+        );
+    }
+
+    m_k = m_scores_gt_threshold_fp32_cuda.size(0) < max_num_keypoints ? m_scores_gt_threshold_fp32_cuda.size(0) : max_num_keypoints;
     m_scores_indices_topk_cuda  = torch::topk(m_scores_gt_threshold_fp32_cuda, m_k, 0, true, true);
     m_scores_topk_fp32_cuda     = std::get<0>(m_scores_indices_topk_cuda);
     m_indices_topk_int32_cuda   = std::get<1>(m_scores_indices_topk_cuda).to(torch::kInt32);    // [row, col] = [480, 640]
@@ -172,9 +245,34 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor> SuperPointMonoTRT::Forwa
     m_keypoints_topk_normalized_fp32_cuda = (m_keypoints_topk_int32_cuda.to(torch::kFloat32) - m_shift) / m_scale;  // lightglue takes in normalized keypoint coordinats.
 
     return std::make_tuple(
+        int(m_keypoints_topk_int32_cuda.size(0)), 
         m_keypoints_topk_int32_cuda.clone().contiguous(), 
         m_keypoints_topk_normalized_fp32_cuda.clone().contiguous(), 
         m_descriptors_topk_fp32_cuda.clone().contiguous()
     );
+}
+
+void SuperPointMonoTRT::RecordCUDAGraph() {
+    // cudaStreamSynchronize(cuda_stream);
+    cudaDeviceSynchronize();
+    // cudaStreamCaptureModeGlobal works
+    // cudaStreamCaptureModeThreadLocal ???
+    // cudaStreamCaptureModeRelaxed ???
+    cudaStreamBeginCapture(cuda_stream, cudaStreamCaptureModeRelaxed);
+
+    assert(m_context->enqueueV3(cuda_stream));
+
+    cudaStreamEndCapture(cuda_stream, &cuda_graph);
+    cudaGraphInstantiate(&cuda_graph_exec, cuda_graph, nullptr, nullptr, 0);
+    // cudaStreamSynchronize(cuda_stream);
+    cudaDeviceSynchronize();
+}
+
+void SuperPointMonoTRT::LaunchCUDAGraph() {
+    cudaGraphLaunch(cuda_graph_exec, cuda_stream);
+}
+
+void SuperPointMonoTRT::Sync() {
+    cudaStreamSynchronize(cuda_stream);
 }
 

@@ -32,12 +32,21 @@ public :
         const std::string& trt_engine_file_path,
         tensorrt_log::Logger& gLogger
     );
+    
+    ~SuperPointMonoTRT();
 
+    void SetMaxInputShape(const std::unordered_map<std::string, std::vector<int64_t>>& max_input_shape);
     void SetInputShape(const std::unordered_map<std::string, std::vector<int64_t>>& input_shape);
+    void SetInputAddress();
     void CopyInputTensor(const std::unordered_map<std::string, torch::Tensor>& input_tensor);
-    std::tuple<torch::Tensor, torch::Tensor, torch::Tensor> Forward();
+    void Forward();
+    void Forward(const cudaStream_t& cuda_stream);
+    std::tuple<int, torch::Tensor, torch::Tensor, torch::Tensor> PostProcess(float threshold, int max_num_keypoints);
+    void RecordCUDAGraph();
+    void LaunchCUDAGraph();
+    void Sync();
 
-private : 
+public : 
     std::string m_trt_engine_file_path;
 
     std::shared_ptr<nvinfer1::IRuntime> m_runtime;
@@ -47,10 +56,12 @@ private :
 
     BufferTRT m_buffer;
 
+    std::unordered_map<std::string, std::vector<int64_t>> m_max_input_shape;
+    std::unordered_map<std::string, std::vector<int64_t>> m_max_output_shape;
     std::unordered_map<std::string, std::vector<int64_t>> m_input_shape;
     std::unordered_map<std::string, std::vector<int64_t>> m_output_shape;
 
-private : 
+public : 
     int m_k;
     float m_image_rows;
     float m_image_cols;
@@ -72,6 +83,11 @@ private :
     torch::Tensor m_descriptors_topk_fp32_cuda;
     torch::Tensor m_shift;
     torch::Tensor m_keypoints_topk_normalized_fp32_cuda;
+
+public : 
+    cudaStream_t cuda_stream;
+    cudaGraph_t cuda_graph;
+    cudaGraphExec_t cuda_graph_exec;
 };
 
 #endif

@@ -87,16 +87,15 @@ target_link_libraries(
 )
 
 add_executable(
-    demo_0
-    demo_0.cpp
+    demo_mono
+    demo_mono.cpp
 )
 target_link_libraries(
-    demo_0
+    demo_mono
     ${OpenCV_LIBRARIES} 
     ${TORCH_LIBRARIES} 
     ${CUDA_LIBRARIES} 
     tensorrtbuffer
     superpoint_and_lightglue_with_trt
 )
-
 

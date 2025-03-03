@@ -1,0 +1,833 @@
+[03/03/2025-03:58:56] [I] [TRT] Loaded engine size: 5 MiB
+[03/03/2025-03:58:57] [I] [TRT] [MemUsageChange] TensorRT-managed allocation in engine deserialization: CPU +0, GPU +4, now: CPU 0, GPU 4 (MiB)
+[03/03/2025-03:58:57] [I] [TRT] [MemUsageChange] TensorRT-managed allocation in IExecutionContext creation: CPU +0, GPU +155, now: CPU 0, GPU 159 (MiB)
+[03/03/2025-03:58:58] [I] [TRT] Loaded engine size: 35 MiB
+[03/03/2025-03:58:58] [I] [TRT] [MemUsageChange] Init cuBLAS/cuBLASLt: CPU +97, GPU +154, now: CPU 1438, GPU 4668 (MiB)
+[03/03/2025-03:58:59] [I] [TRT] [MemUsageChange] Init cuDNN: CPU +83, GPU +135, now: CPU 1521, GPU 4803 (MiB)
+[03/03/2025-03:58:59] [I] [TRT] [MemUsageChange] TensorRT-managed allocation in engine deserialization: CPU +0, GPU +22, now: CPU 0, GPU 181 (MiB)
+[03/03/2025-03:58:59] [I] [TRT] [MemUsageChange] Init cuBLAS/cuBLASLt: CPU +0, GPU +0, now: CPU 1485, GPU 4772 (MiB)
+[03/03/2025-03:58:59] [I] [TRT] [MemUsageChange] Init cuDNN: CPU +0, GPU +7, now: CPU 1485, GPU 4779 (MiB)
+[03/03/2025-03:59:02] [I] [TRT] [MemUsageChange] TensorRT-managed allocation in IExecutionContext creation: CPU +0, GPU +35, now: CPU 0, GPU 216 (MiB)
+--------------------------------------------------------------------------------
+testing with these images : 
+0 : /root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT/demo/build/../../image/freiburg_sequence/1341847980.722988.png
+1 : /root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT/demo/build/../../image/freiburg_sequence/1341847981.726650.png
+2 : /root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT/demo/build/../../image/freiburg_sequence/1341847982.730674.png
+3 : /root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT/demo/build/../../image/freiburg_sequence/1341847983.738736.png
+4 : /root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT/demo/build/../../image/freiburg_sequence/1341847984.743352.png
+5 : /root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT/demo/build/../../image/freiburg_sequence/1341847985.746954.png
+6 : /root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT/demo/build/../../image/freiburg_sequence/1341847986.762616.png
+7 : /root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT/demo/build/../../image/freiburg_sequence/1341847987.758741.png
+8 : /root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT/demo/build/../../image/freiburg_sequence/1341847988.769740.png
+9 : /root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT/demo/build/../../image/freiburg_sequence/1341847989.802890.png
+10 : /root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT/demo/build/../../image/freiburg_sequence/1341847990.810771.png
+11 : /root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT/demo/build/../../image/freiburg_sequence/1341847991.814748.png
+12 : /root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT/demo/build/../../image/freiburg_sequence/1341847992.818723.png
+13 : /root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT/demo/build/../../image/freiburg_sequence/1341847993.826735.png
+14 : /root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT/demo/build/../../image/freiburg_sequence/1341847994.866828.png
+15 : /root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT/demo/build/../../image/freiburg_sequence/1341847995.870641.png
+16 : /root/hcsm/Projects/LightGlue-with-FlashAttentionV2-TensorRT/demo/build/../../image/freiburg_sequence/1341847996.874766.png
+--------------------------------------------------------------------------------
+0-th test : image_idx_0 == 0 , image_idx_1 == 2 
+lightglue_match_indices_0_int64_cuda : [498]
+lightglue_match_indices_1_int64_cuda : [498]
+inliers_vec.size() : 498
+matches_vec.size() : 453
+superpoint execution time : 36.5769 ms
+lightglue  execution time : 51.0754 ms
+--------------------------------------------------------------------------------
+1-th test : image_idx_0 == 2 , image_idx_1 == 0 
+lightglue_match_indices_0_int64_cuda : [498]
+lightglue_match_indices_1_int64_cuda : [498]
+inliers_vec.size() : 498
+matches_vec.size() : 452
+superpoint execution time : 36.0027 ms
+lightglue  execution time : 50.6081 ms
+--------------------------------------------------------------------------------
+2-th test : image_idx_0 == 0 , image_idx_1 == 2 
+lightglue_match_indices_0_int64_cuda : [498]
+lightglue_match_indices_1_int64_cuda : [498]
+inliers_vec.size() : 498
+matches_vec.size() : 453
+superpoint execution time : 35.4959 ms
+lightglue  execution time : 49.4603 ms
+--------------------------------------------------------------------------------
+3-th test : image_idx_0 == 2 , image_idx_1 == 0 
+lightglue_match_indices_0_int64_cuda : [498]
+lightglue_match_indices_1_int64_cuda : [498]
+inliers_vec.size() : 498
+matches_vec.size() : 452
+superpoint execution time : 38.0508 ms
+lightglue  execution time : 50.561 ms
+--------------------------------------------------------------------------------
+4-th test : image_idx_0 == 0 , image_idx_1 == 3 
+lightglue_match_indices_0_int64_cuda : [315]
+lightglue_match_indices_1_int64_cuda : [315]
+inliers_vec.size() : 315
+matches_vec.size() : 297
+superpoint execution time : 35.4677 ms
+lightglue  execution time : 49.5433 ms
+--------------------------------------------------------------------------------
+5-th test : image_idx_0 == 3 , image_idx_1 == 7 
+lightglue_match_indices_0_int64_cuda : [83]
+lightglue_match_indices_1_int64_cuda : [83]
+inliers_vec.size() : 83
+matches_vec.size() : 66
+superpoint execution time : 35.5333 ms
+lightglue  execution time : 49.5454 ms
+--------------------------------------------------------------------------------
+6-th test : image_idx_0 == 7 , image_idx_1 == 10 
+lightglue_match_indices_0_int64_cuda : [167]
+lightglue_match_indices_1_int64_cuda : [167]
+inliers_vec.size() : 167
+matches_vec.size() : 130
+superpoint execution time : 36.2786 ms
+lightglue  execution time : 50.2348 ms
+--------------------------------------------------------------------------------
+7-th test : image_idx_0 == 10 , image_idx_1 == 6 
+lightglue_match_indices_0_int64_cuda : [101]
+lightglue_match_indices_1_int64_cuda : [101]
+inliers_vec.size() : 101
+matches_vec.size() : 78
+superpoint execution time : 35.8798 ms
+lightglue  execution time : 49.5369 ms
+--------------------------------------------------------------------------------
+8-th test : image_idx_0 == 6 , image_idx_1 == 3 
+lightglue_match_indices_0_int64_cuda : [120]
+lightglue_match_indices_1_int64_cuda : [120]
+inliers_vec.size() : 120
+matches_vec.size() : 96
+superpoint execution time : 36.0696 ms
+lightglue  execution time : 49.3851 ms
+--------------------------------------------------------------------------------
+9-th test : image_idx_0 == 3 , image_idx_1 == 5 
+lightglue_match_indices_0_int64_cuda : [262]
+lightglue_match_indices_1_int64_cuda : [262]
+inliers_vec.size() : 262
+matches_vec.size() : 224
+superpoint execution time : 36.9472 ms
+lightglue  execution time : 48.761 ms
+--------------------------------------------------------------------------------
+10-th test : image_idx_0 == 5 , image_idx_1 == 2 
+lightglue_match_indices_0_int64_cuda : [203]
+lightglue_match_indices_1_int64_cuda : [203]
+inliers_vec.size() : 203
+matches_vec.size() : 196
+superpoint execution time : 36.0972 ms
+lightglue  execution time : 49.4244 ms
+--------------------------------------------------------------------------------
+11-th test : image_idx_0 == 2 , image_idx_1 == 3 
+lightglue_match_indices_0_int64_cuda : [425]
+lightglue_match_indices_1_int64_cuda : [425]
+inliers_vec.size() : 425
+matches_vec.size() : 373
+superpoint execution time : 36.4816 ms
+lightglue  execution time : 50.6001 ms
+--------------------------------------------------------------------------------
+12-th test : image_idx_0 == 3 , image_idx_1 == 2 
+lightglue_match_indices_0_int64_cuda : [425]
+lightglue_match_indices_1_int64_cuda : [425]
+inliers_vec.size() : 425
+matches_vec.size() : 375
+superpoint execution time : 36.2124 ms
+lightglue  execution time : 53.4574 ms
+--------------------------------------------------------------------------------
+13-th test : image_idx_0 == 2 , image_idx_1 == 0 
+lightglue_match_indices_0_int64_cuda : [498]
+lightglue_match_indices_1_int64_cuda : [498]
+inliers_vec.size() : 498
+matches_vec.size() : 452
+superpoint execution time : 29.7357 ms
+lightglue  execution time : 44.1753 ms
+--------------------------------------------------------------------------------
+14-th test : image_idx_0 == 0 , image_idx_1 == 2 
+lightglue_match_indices_0_int64_cuda : [498]
+lightglue_match_indices_1_int64_cuda : [498]
+inliers_vec.size() : 498
+matches_vec.size() : 453
+superpoint execution time : 29.7478 ms
+lightglue  execution time : 44.5657 ms
+--------------------------------------------------------------------------------
+15-th test : image_idx_0 == 2 , image_idx_1 == 5 
+lightglue_match_indices_0_int64_cuda : [203]
+lightglue_match_indices_1_int64_cuda : [203]
+inliers_vec.size() : 203
+matches_vec.size() : 157
+superpoint execution time : 29.0714 ms
+lightglue  execution time : 44.6325 ms
+--------------------------------------------------------------------------------
+16-th test : image_idx_0 == 5 , image_idx_1 == 3 
+lightglue_match_indices_0_int64_cuda : [262]
+lightglue_match_indices_1_int64_cuda : [262]
+inliers_vec.size() : 262
+matches_vec.size() : 227
+superpoint execution time : 29.0146 ms
+lightglue  execution time : 44.247 ms
+--------------------------------------------------------------------------------
+17-th test : image_idx_0 == 3 , image_idx_1 == 7 
+lightglue_match_indices_0_int64_cuda : [83]
+lightglue_match_indices_1_int64_cuda : [83]
+inliers_vec.size() : 83
+matches_vec.size() : 66
+superpoint execution time : 29.0178 ms
+lightglue  execution time : 44.5207 ms
+--------------------------------------------------------------------------------
+18-th test : image_idx_0 == 7 , image_idx_1 == 6 
+lightglue_match_indices_0_int64_cuda : [349]
+lightglue_match_indices_1_int64_cuda : [349]
+inliers_vec.size() : 349
+matches_vec.size() : 326
+superpoint execution time : 28.9446 ms
+lightglue  execution time : 44.8013 ms
+--------------------------------------------------------------------------------
+19-th test : image_idx_0 == 6 , image_idx_1 == 7 
+lightglue_match_indices_0_int64_cuda : [349]
+lightglue_match_indices_1_int64_cuda : [349]
+inliers_vec.size() : 349
+matches_vec.size() : 311
+superpoint execution time : 29.0238 ms
+lightglue  execution time : 45.0971 ms
+--------------------------------------------------------------------------------
+20-th test : image_idx_0 == 7 , image_idx_1 == 11 
+lightglue_match_indices_0_int64_cuda : [102]
+lightglue_match_indices_1_int64_cuda : [102]
+inliers_vec.size() : 102
+matches_vec.size() : 89
+superpoint execution time : 28.9977 ms
+lightglue  execution time : 44.6994 ms
+--------------------------------------------------------------------------------
+21-th test : image_idx_0 == 11 , image_idx_1 == 8 
+lightglue_match_indices_0_int64_cuda : [141]
+lightglue_match_indices_1_int64_cuda : [141]
+inliers_vec.size() : 141
+matches_vec.size() : 114
+superpoint execution time : 28.9437 ms
+lightglue  execution time : 44.5405 ms
+--------------------------------------------------------------------------------
+22-th test : image_idx_0 == 8 , image_idx_1 == 12 
+lightglue_match_indices_0_int64_cuda : [47]
+lightglue_match_indices_1_int64_cuda : [47]
+inliers_vec.size() : 47
+matches_vec.size() : 37
+superpoint execution time : 29.062 ms
+lightglue  execution time : 44.0415 ms
+--------------------------------------------------------------------------------
+23-th test : image_idx_0 == 12 , image_idx_1 == 15 
+lightglue_match_indices_0_int64_cuda : [129]
+lightglue_match_indices_1_int64_cuda : [129]
+inliers_vec.size() : 129
+matches_vec.size() : 103
+superpoint execution time : 29.0449 ms
+lightglue  execution time : 44.2014 ms
+--------------------------------------------------------------------------------
+24-th test : image_idx_0 == 15 , image_idx_1 == 16 
+lightglue_match_indices_0_int64_cuda : [453]
+lightglue_match_indices_1_int64_cuda : [453]
+inliers_vec.size() : 453
+matches_vec.size() : 401
+superpoint execution time : 29.1934 ms
+lightglue  execution time : 44.4308 ms
+--------------------------------------------------------------------------------
+25-th test : image_idx_0 == 16 , image_idx_1 == 13 
+lightglue_match_indices_0_int64_cuda : [168]
+lightglue_match_indices_1_int64_cuda : [168]
+inliers_vec.size() : 168
+matches_vec.size() : 161
+superpoint execution time : 29.1358 ms
+lightglue  execution time : 44.5347 ms
+--------------------------------------------------------------------------------
+26-th test : image_idx_0 == 13 , image_idx_1 == 11 
+lightglue_match_indices_0_int64_cuda : [204]
+lightglue_match_indices_1_int64_cuda : [204]
+inliers_vec.size() : 204
+matches_vec.size() : 170
+superpoint execution time : 29.7972 ms
+lightglue  execution time : 43.8457 ms
+--------------------------------------------------------------------------------
+27-th test : image_idx_0 == 11 , image_idx_1 == 7 
+lightglue_match_indices_0_int64_cuda : [102]
+lightglue_match_indices_1_int64_cuda : [102]
+inliers_vec.size() : 102
+matches_vec.size() : 73
+superpoint execution time : 29.0238 ms
+lightglue  execution time : 44.3215 ms
+--------------------------------------------------------------------------------
+28-th test : image_idx_0 == 7 , image_idx_1 == 8 
+lightglue_match_indices_0_int64_cuda : [408]
+lightglue_match_indices_1_int64_cuda : [408]
+inliers_vec.size() : 408
+matches_vec.size() : 347
+superpoint execution time : 29.8749 ms
+lightglue  execution time : 44.1373 ms
+--------------------------------------------------------------------------------
+29-th test : image_idx_0 == 8 , image_idx_1 == 5 
+lightglue_match_indices_0_int64_cuda : [149]
+lightglue_match_indices_1_int64_cuda : [149]
+inliers_vec.size() : 149
+matches_vec.size() : 120
+superpoint execution time : 29.0302 ms
+lightglue  execution time : 44.3683 ms
+--------------------------------------------------------------------------------
+30-th test : image_idx_0 == 5 , image_idx_1 == 9 
+lightglue_match_indices_0_int64_cuda : [104]
+lightglue_match_indices_1_int64_cuda : [104]
+inliers_vec.size() : 104
+matches_vec.size() : 79
+superpoint execution time : 29.034 ms
+lightglue  execution time : 44.5715 ms
+--------------------------------------------------------------------------------
+31-th test : image_idx_0 == 9 , image_idx_1 == 5 
+lightglue_match_indices_0_int64_cuda : [104]
+lightglue_match_indices_1_int64_cuda : [104]
+inliers_vec.size() : 104
+matches_vec.size() : 89
+superpoint execution time : 28.9794 ms
+lightglue  execution time : 44.2616 ms
+--------------------------------------------------------------------------------
+32-th test : image_idx_0 == 5 , image_idx_1 == 6 
+lightglue_match_indices_0_int64_cuda : [349]
+lightglue_match_indices_1_int64_cuda : [349]
+inliers_vec.size() : 349
+matches_vec.size() : 268
+superpoint execution time : 28.9608 ms
+lightglue  execution time : 44.5132 ms
+--------------------------------------------------------------------------------
+33-th test : image_idx_0 == 6 , image_idx_1 == 3 
+lightglue_match_indices_0_int64_cuda : [120]
+lightglue_match_indices_1_int64_cuda : [120]
+inliers_vec.size() : 120
+matches_vec.size() : 96
+superpoint execution time : 29.341 ms
+lightglue  execution time : 44.699 ms
+--------------------------------------------------------------------------------
+34-th test : image_idx_0 == 3 , image_idx_1 == 5 
+lightglue_match_indices_0_int64_cuda : [262]
+lightglue_match_indices_1_int64_cuda : [262]
+inliers_vec.size() : 262
+matches_vec.size() : 224
+superpoint execution time : 29.4787 ms
+lightglue  execution time : 44.7857 ms
+--------------------------------------------------------------------------------
+35-th test : image_idx_0 == 5 , image_idx_1 == 2 
+lightglue_match_indices_0_int64_cuda : [203]
+lightglue_match_indices_1_int64_cuda : [203]
+inliers_vec.size() : 203
+matches_vec.size() : 196
+superpoint execution time : 29.1737 ms
+lightglue  execution time : 44.8057 ms
+--------------------------------------------------------------------------------
+36-th test : image_idx_0 == 2 , image_idx_1 == 0 
+lightglue_match_indices_0_int64_cuda : [498]
+lightglue_match_indices_1_int64_cuda : [498]
+inliers_vec.size() : 498
+matches_vec.size() : 452
+superpoint execution time : 29.5358 ms
+lightglue  execution time : 45.0792 ms
+--------------------------------------------------------------------------------
+37-th test : image_idx_0 == 0 , image_idx_1 == 1 
+lightglue_match_indices_0_int64_cuda : [569]
+lightglue_match_indices_1_int64_cuda : [569]
+inliers_vec.size() : 569
+matches_vec.size() : 523
+superpoint execution time : 28.9471 ms
+lightglue  execution time : 44.2259 ms
+--------------------------------------------------------------------------------
+38-th test : image_idx_0 == 1 , image_idx_1 == 0 
+lightglue_match_indices_0_int64_cuda : [569]
+lightglue_match_indices_1_int64_cuda : [569]
+inliers_vec.size() : 569
+matches_vec.size() : 537
+superpoint execution time : 29.1243 ms
+lightglue  execution time : 44.839 ms
+--------------------------------------------------------------------------------
+39-th test : image_idx_0 == 0 , image_idx_1 == 1 
+lightglue_match_indices_0_int64_cuda : [569]
+lightglue_match_indices_1_int64_cuda : [569]
+inliers_vec.size() : 569
+matches_vec.size() : 523
+superpoint execution time : 29.16 ms
+lightglue  execution time : 44.6184 ms
+--------------------------------------------------------------------------------
+40-th test : image_idx_0 == 1 , image_idx_1 == 2 
+lightglue_match_indices_0_int64_cuda : [532]
+lightglue_match_indices_1_int64_cuda : [532]
+inliers_vec.size() : 532
+matches_vec.size() : 498
+superpoint execution time : 29.1345 ms
+lightglue  execution time : 44.9398 ms
+--------------------------------------------------------------------------------
+41-th test : image_idx_0 == 2 , image_idx_1 == 0 
+lightglue_match_indices_0_int64_cuda : [498]
+lightglue_match_indices_1_int64_cuda : [498]
+inliers_vec.size() : 498
+matches_vec.size() : 452
+superpoint execution time : 29.9321 ms
+lightglue  execution time : 44.7048 ms
+--------------------------------------------------------------------------------
+42-th test : image_idx_0 == 0 , image_idx_1 == 2 
+lightglue_match_indices_0_int64_cuda : [498]
+lightglue_match_indices_1_int64_cuda : [498]
+inliers_vec.size() : 498
+matches_vec.size() : 453
+superpoint execution time : 29.026 ms
+lightglue  execution time : 44.2096 ms
+--------------------------------------------------------------------------------
+43-th test : image_idx_0 == 2 , image_idx_1 == 0 
+lightglue_match_indices_0_int64_cuda : [498]
+lightglue_match_indices_1_int64_cuda : [498]
+inliers_vec.size() : 498
+matches_vec.size() : 452
+superpoint execution time : 29.6234 ms
+lightglue  execution time : 44.5975 ms
+--------------------------------------------------------------------------------
+44-th test : image_idx_0 == 0 , image_idx_1 == 2 
+lightglue_match_indices_0_int64_cuda : [498]
+lightglue_match_indices_1_int64_cuda : [498]
+inliers_vec.size() : 498
+matches_vec.size() : 453
+superpoint execution time : 29.396 ms
+lightglue  execution time : 44.6364 ms
+--------------------------------------------------------------------------------
+45-th test : image_idx_0 == 2 , image_idx_1 == 0 
+lightglue_match_indices_0_int64_cuda : [498]
+lightglue_match_indices_1_int64_cuda : [498]
+inliers_vec.size() : 498
+matches_vec.size() : 452
+superpoint execution time : 29.1423 ms
+lightglue  execution time : 44.1444 ms
+--------------------------------------------------------------------------------
+46-th test : image_idx_0 == 0 , image_idx_1 == 2 
+lightglue_match_indices_0_int64_cuda : [498]
+lightglue_match_indices_1_int64_cuda : [498]
+inliers_vec.size() : 498
+matches_vec.size() : 453
+superpoint execution time : 29.3073 ms
+lightglue  execution time : 44.4084 ms
+--------------------------------------------------------------------------------
+47-th test : image_idx_0 == 2 , image_idx_1 == 6 
+lightglue_match_indices_0_int64_cuda : [126]
+lightglue_match_indices_1_int64_cuda : [126]
+inliers_vec.size() : 126
+matches_vec.size() : 111
+superpoint execution time : 29.5451 ms
+lightglue  execution time : 44.1731 ms
+--------------------------------------------------------------------------------
+48-th test : image_idx_0 == 6 , image_idx_1 == 3 
+lightglue_match_indices_0_int64_cuda : [120]
+lightglue_match_indices_1_int64_cuda : [120]
+inliers_vec.size() : 120
+matches_vec.size() : 96
+superpoint execution time : 29.1924 ms
+lightglue  execution time : 44.9429 ms
+--------------------------------------------------------------------------------
+49-th test : image_idx_0 == 3 , image_idx_1 == 7 
+lightglue_match_indices_0_int64_cuda : [83]
+lightglue_match_indices_1_int64_cuda : [83]
+inliers_vec.size() : 83
+matches_vec.size() : 66
+superpoint execution time : 29.2498 ms
+lightglue  execution time : 44.158 ms
+--------------------------------------------------------------------------------
+50-th test : image_idx_0 == 7 , image_idx_1 == 4 
+lightglue_match_indices_0_int64_cuda : [91]
+lightglue_match_indices_1_int64_cuda : [91]
+inliers_vec.size() : 91
+matches_vec.size() : 66
+superpoint execution time : 29.1388 ms
+lightglue  execution time : 44.9376 ms
+--------------------------------------------------------------------------------
+51-th test : image_idx_0 == 4 , image_idx_1 == 7 
+lightglue_match_indices_0_int64_cuda : [91]
+lightglue_match_indices_1_int64_cuda : [91]
+inliers_vec.size() : 91
+matches_vec.size() : 72
+superpoint execution time : 29.0259 ms
+lightglue  execution time : 44.633 ms
+--------------------------------------------------------------------------------
+52-th test : image_idx_0 == 7 , image_idx_1 == 10 
+lightglue_match_indices_0_int64_cuda : [167]
+lightglue_match_indices_1_int64_cuda : [167]
+inliers_vec.size() : 167
+matches_vec.size() : 130
+superpoint execution time : 29.116 ms
+lightglue  execution time : 45.2077 ms
+--------------------------------------------------------------------------------
+53-th test : image_idx_0 == 10 , image_idx_1 == 6 
+lightglue_match_indices_0_int64_cuda : [101]
+lightglue_match_indices_1_int64_cuda : [101]
+inliers_vec.size() : 101
+matches_vec.size() : 78
+superpoint execution time : 29.1047 ms
+lightglue  execution time : 44.6848 ms
+--------------------------------------------------------------------------------
+54-th test : image_idx_0 == 6 , image_idx_1 == 9 
+lightglue_match_indices_0_int64_cuda : [160]
+lightglue_match_indices_1_int64_cuda : [160]
+inliers_vec.size() : 160
+matches_vec.size() : 139
+superpoint execution time : 29.3434 ms
+lightglue  execution time : 45.1165 ms
+--------------------------------------------------------------------------------
+55-th test : image_idx_0 == 9 , image_idx_1 == 7 
+lightglue_match_indices_0_int64_cuda : [287]
+lightglue_match_indices_1_int64_cuda : [287]
+inliers_vec.size() : 287
+matches_vec.size() : 275
+superpoint execution time : 29.1364 ms
+lightglue  execution time : 44.3216 ms
+--------------------------------------------------------------------------------
+56-th test : image_idx_0 == 7 , image_idx_1 == 9 
+lightglue_match_indices_0_int64_cuda : [287]
+lightglue_match_indices_1_int64_cuda : [287]
+inliers_vec.size() : 287
+matches_vec.size() : 273
+superpoint execution time : 29.0013 ms
+lightglue  execution time : 44.9203 ms
+--------------------------------------------------------------------------------
+57-th test : image_idx_0 == 9 , image_idx_1 == 11 
+lightglue_match_indices_0_int64_cuda : [197]
+lightglue_match_indices_1_int64_cuda : [197]
+inliers_vec.size() : 197
+matches_vec.size() : 168
+superpoint execution time : 29.3371 ms
+lightglue  execution time : 44.9148 ms
+--------------------------------------------------------------------------------
+58-th test : image_idx_0 == 11 , image_idx_1 == 10 
+lightglue_match_indices_0_int64_cuda : [391]
+lightglue_match_indices_1_int64_cuda : [391]
+inliers_vec.size() : 391
+matches_vec.size() : 323
+superpoint execution time : 29.1723 ms
+lightglue  execution time : 44.7225 ms
+--------------------------------------------------------------------------------
+59-th test : image_idx_0 == 10 , image_idx_1 == 8 
+lightglue_match_indices_0_int64_cuda : [252]
+lightglue_match_indices_1_int64_cuda : [252]
+inliers_vec.size() : 252
+matches_vec.size() : 210
+superpoint execution time : 29.4301 ms
+lightglue  execution time : 44.7812 ms
+--------------------------------------------------------------------------------
+60-th test : image_idx_0 == 8 , image_idx_1 == 10 
+lightglue_match_indices_0_int64_cuda : [252]
+lightglue_match_indices_1_int64_cuda : [252]
+inliers_vec.size() : 252
+matches_vec.size() : 210
+superpoint execution time : 29.2114 ms
+lightglue  execution time : 44.8976 ms
+--------------------------------------------------------------------------------
+61-th test : image_idx_0 == 10 , image_idx_1 == 6 
+lightglue_match_indices_0_int64_cuda : [101]
+lightglue_match_indices_1_int64_cuda : [101]
+inliers_vec.size() : 101
+matches_vec.size() : 78
+superpoint execution time : 29.1971 ms
+lightglue  execution time : 44.6984 ms
+--------------------------------------------------------------------------------
+62-th test : image_idx_0 == 6 , image_idx_1 == 4 
+lightglue_match_indices_0_int64_cuda : [171]
+lightglue_match_indices_1_int64_cuda : [171]
+inliers_vec.size() : 171
+matches_vec.size() : 146
+superpoint execution time : 29.2525 ms
+lightglue  execution time : 44.9497 ms
+--------------------------------------------------------------------------------
+63-th test : image_idx_0 == 4 , image_idx_1 == 7 
+lightglue_match_indices_0_int64_cuda : [91]
+lightglue_match_indices_1_int64_cuda : [91]
+inliers_vec.size() : 91
+matches_vec.size() : 72
+superpoint execution time : 30.6712 ms
+lightglue  execution time : 44.361 ms
+--------------------------------------------------------------------------------
+64-th test : image_idx_0 == 7 , image_idx_1 == 11 
+lightglue_match_indices_0_int64_cuda : [102]
+lightglue_match_indices_1_int64_cuda : [102]
+inliers_vec.size() : 102
+matches_vec.size() : 89
+superpoint execution time : 29.1581 ms
+lightglue  execution time : 44.5042 ms
+--------------------------------------------------------------------------------
+65-th test : image_idx_0 == 11 , image_idx_1 == 10 
+lightglue_match_indices_0_int64_cuda : [391]
+lightglue_match_indices_1_int64_cuda : [391]
+inliers_vec.size() : 391
+matches_vec.size() : 323
+superpoint execution time : 28.9825 ms
+lightglue  execution time : 44.953 ms
+--------------------------------------------------------------------------------
+66-th test : image_idx_0 == 10 , image_idx_1 == 13 
+lightglue_match_indices_0_int64_cuda : [129]
+lightglue_match_indices_1_int64_cuda : [129]
+inliers_vec.size() : 129
+matches_vec.size() : 112
+superpoint execution time : 28.9543 ms
+lightglue  execution time : 44.6702 ms
+--------------------------------------------------------------------------------
+67-th test : image_idx_0 == 13 , image_idx_1 == 9 
+lightglue_match_indices_0_int64_cuda : [52]
+lightglue_match_indices_1_int64_cuda : [52]
+inliers_vec.size() : 52
+matches_vec.size() : 43
+superpoint execution time : 29.1014 ms
+lightglue  execution time : 44.564 ms
+--------------------------------------------------------------------------------
+68-th test : image_idx_0 == 9 , image_idx_1 == 8 
+lightglue_match_indices_0_int64_cuda : [397]
+lightglue_match_indices_1_int64_cuda : [397]
+inliers_vec.size() : 397
+matches_vec.size() : 379
+superpoint execution time : 29.0253 ms
+lightglue  execution time : 44.2077 ms
+--------------------------------------------------------------------------------
+69-th test : image_idx_0 == 8 , image_idx_1 == 10 
+lightglue_match_indices_0_int64_cuda : [252]
+lightglue_match_indices_1_int64_cuda : [252]
+inliers_vec.size() : 252
+matches_vec.size() : 210
+superpoint execution time : 29.1225 ms
+lightglue  execution time : 44.056 ms
+--------------------------------------------------------------------------------
+70-th test : image_idx_0 == 10 , image_idx_1 == 12 
+lightglue_match_indices_0_int64_cuda : [240]
+lightglue_match_indices_1_int64_cuda : [240]
+inliers_vec.size() : 240
+matches_vec.size() : 209
+superpoint execution time : 29.1422 ms
+lightglue  execution time : 44.5675 ms
+--------------------------------------------------------------------------------
+71-th test : image_idx_0 == 12 , image_idx_1 == 15 
+lightglue_match_indices_0_int64_cuda : [129]
+lightglue_match_indices_1_int64_cuda : [129]
+inliers_vec.size() : 129
+matches_vec.size() : 103
+superpoint execution time : 29.6755 ms
+lightglue  execution time : 44.3808 ms
+--------------------------------------------------------------------------------
+72-th test : image_idx_0 == 15 , image_idx_1 == 16 
+lightglue_match_indices_0_int64_cuda : [453]
+lightglue_match_indices_1_int64_cuda : [453]
+inliers_vec.size() : 453
+matches_vec.size() : 401
+superpoint execution time : 29.6214 ms
+lightglue  execution time : 44.8281 ms
+--------------------------------------------------------------------------------
+73-th test : image_idx_0 == 16 , image_idx_1 == 12 
+lightglue_match_indices_0_int64_cuda : [121]
+lightglue_match_indices_1_int64_cuda : [121]
+inliers_vec.size() : 121
+matches_vec.size() : 91
+superpoint execution time : 29.0872 ms
+lightglue  execution time : 44.3668 ms
+--------------------------------------------------------------------------------
+74-th test : image_idx_0 == 12 , image_idx_1 == 14 
+lightglue_match_indices_0_int64_cuda : [165]
+lightglue_match_indices_1_int64_cuda : [165]
+inliers_vec.size() : 165
+matches_vec.size() : 144
+superpoint execution time : 29.0864 ms
+lightglue  execution time : 44.1177 ms
+--------------------------------------------------------------------------------
+75-th test : image_idx_0 == 14 , image_idx_1 == 16 
+lightglue_match_indices_0_int64_cuda : [294]
+lightglue_match_indices_1_int64_cuda : [294]
+inliers_vec.size() : 294
+matches_vec.size() : 261
+superpoint execution time : 29.8021 ms
+lightglue  execution time : 44.696 ms
+--------------------------------------------------------------------------------
+76-th test : image_idx_0 == 16 , image_idx_1 == 14 
+lightglue_match_indices_0_int64_cuda : [294]
+lightglue_match_indices_1_int64_cuda : [294]
+inliers_vec.size() : 294
+matches_vec.size() : 261
+superpoint execution time : 29.0645 ms
+lightglue  execution time : 43.9999 ms
+--------------------------------------------------------------------------------
+77-th test : image_idx_0 == 14 , image_idx_1 == 16 
+lightglue_match_indices_0_int64_cuda : [294]
+lightglue_match_indices_1_int64_cuda : [294]
+inliers_vec.size() : 294
+matches_vec.size() : 261
+superpoint execution time : 29.1266 ms
+lightglue  execution time : 44.9268 ms
+--------------------------------------------------------------------------------
+78-th test : image_idx_0 == 16 , image_idx_1 == 12 
+lightglue_match_indices_0_int64_cuda : [121]
+lightglue_match_indices_1_int64_cuda : [121]
+inliers_vec.size() : 121
+matches_vec.size() : 91
+superpoint execution time : 29.7641 ms
+lightglue  execution time : 44.5039 ms
+--------------------------------------------------------------------------------
+79-th test : image_idx_0 == 12 , image_idx_1 == 9 
+lightglue_match_indices_0_int64_cuda : [125]
+lightglue_match_indices_1_int64_cuda : [125]
+inliers_vec.size() : 125
+matches_vec.size() : 120
+superpoint execution time : 29.259 ms
+lightglue  execution time : 44.6728 ms
+--------------------------------------------------------------------------------
+80-th test : image_idx_0 == 9 , image_idx_1 == 8 
+lightglue_match_indices_0_int64_cuda : [397]
+lightglue_match_indices_1_int64_cuda : [397]
+inliers_vec.size() : 397
+matches_vec.size() : 379
+superpoint execution time : 29.7342 ms
+lightglue  execution time : 44.0936 ms
+--------------------------------------------------------------------------------
+81-th test : image_idx_0 == 8 , image_idx_1 == 9 
+lightglue_match_indices_0_int64_cuda : [397]
+lightglue_match_indices_1_int64_cuda : [397]
+inliers_vec.size() : 397
+matches_vec.size() : 313
+superpoint execution time : 28.9848 ms
+lightglue  execution time : 44.3252 ms
+--------------------------------------------------------------------------------
+82-th test : image_idx_0 == 9 , image_idx_1 == 11 
+lightglue_match_indices_0_int64_cuda : [197]
+lightglue_match_indices_1_int64_cuda : [197]
+inliers_vec.size() : 197
+matches_vec.size() : 168
+superpoint execution time : 29.1932 ms
+lightglue  execution time : 43.8561 ms
+--------------------------------------------------------------------------------
+83-th test : image_idx_0 == 11 , image_idx_1 == 13 
+lightglue_match_indices_0_int64_cuda : [204]
+lightglue_match_indices_1_int64_cuda : [204]
+inliers_vec.size() : 204
+matches_vec.size() : 171
+superpoint execution time : 28.9832 ms
+lightglue  execution time : 44.397 ms
+--------------------------------------------------------------------------------
+84-th test : image_idx_0 == 13 , image_idx_1 == 15 
+lightglue_match_indices_0_int64_cuda : [219]
+lightglue_match_indices_1_int64_cuda : [219]
+inliers_vec.size() : 219
+matches_vec.size() : 175
+superpoint execution time : 29.1416 ms
+lightglue  execution time : 44.5197 ms
+--------------------------------------------------------------------------------
+85-th test : image_idx_0 == 15 , image_idx_1 == 16 
+lightglue_match_indices_0_int64_cuda : [453]
+lightglue_match_indices_1_int64_cuda : [453]
+inliers_vec.size() : 453
+matches_vec.size() : 401
+superpoint execution time : 29.3228 ms
+lightglue  execution time : 44.9917 ms
+--------------------------------------------------------------------------------
+86-th test : image_idx_0 == 16 , image_idx_1 == 14 
+lightglue_match_indices_0_int64_cuda : [294]
+lightglue_match_indices_1_int64_cuda : [294]
+inliers_vec.size() : 294
+matches_vec.size() : 261
+superpoint execution time : 29.6146 ms
+lightglue  execution time : 44.7988 ms
+--------------------------------------------------------------------------------
+87-th test : image_idx_0 == 14 , image_idx_1 == 12 
+lightglue_match_indices_0_int64_cuda : [165]
+lightglue_match_indices_1_int64_cuda : [165]
+inliers_vec.size() : 165
+matches_vec.size() : 151
+superpoint execution time : 30.3526 ms
+lightglue  execution time : 44.4276 ms
+--------------------------------------------------------------------------------
+88-th test : image_idx_0 == 12 , image_idx_1 == 15 
+lightglue_match_indices_0_int64_cuda : [129]
+lightglue_match_indices_1_int64_cuda : [129]
+inliers_vec.size() : 129
+matches_vec.size() : 103
+superpoint execution time : 30.6586 ms
+lightglue  execution time : 44.8726 ms
+--------------------------------------------------------------------------------
+89-th test : image_idx_0 == 15 , image_idx_1 == 16 
+lightglue_match_indices_0_int64_cuda : [453]
+lightglue_match_indices_1_int64_cuda : [453]
+inliers_vec.size() : 453
+matches_vec.size() : 401
+superpoint execution time : 29.5952 ms
+lightglue  execution time : 45.1241 ms
+--------------------------------------------------------------------------------
+90-th test : image_idx_0 == 16 , image_idx_1 == 15 
+lightglue_match_indices_0_int64_cuda : [453]
+lightglue_match_indices_1_int64_cuda : [453]
+inliers_vec.size() : 453
+matches_vec.size() : 416
+superpoint execution time : 29.1035 ms
+lightglue  execution time : 44.8569 ms
+--------------------------------------------------------------------------------
+91-th test : image_idx_0 == 15 , image_idx_1 == 16 
+lightglue_match_indices_0_int64_cuda : [453]
+lightglue_match_indices_1_int64_cuda : [453]
+inliers_vec.size() : 453
+matches_vec.size() : 401
+superpoint execution time : 28.9964 ms
+lightglue  execution time : 44.8971 ms
+--------------------------------------------------------------------------------
+92-th test : image_idx_0 == 16 , image_idx_1 == 15 
+lightglue_match_indices_0_int64_cuda : [453]
+lightglue_match_indices_1_int64_cuda : [453]
+inliers_vec.size() : 453
+matches_vec.size() : 416
+superpoint execution time : 29.4036 ms
+lightglue  execution time : 44.8903 ms
+--------------------------------------------------------------------------------
+93-th test : image_idx_0 == 15 , image_idx_1 == 13 
+lightglue_match_indices_0_int64_cuda : [219]
+lightglue_match_indices_1_int64_cuda : [219]
+inliers_vec.size() : 219
+matches_vec.size() : 199
+superpoint execution time : 30.118 ms
+lightglue  execution time : 44.1808 ms
+--------------------------------------------------------------------------------
+94-th test : image_idx_0 == 13 , image_idx_1 == 15 
+lightglue_match_indices_0_int64_cuda : [219]
+lightglue_match_indices_1_int64_cuda : [219]
+inliers_vec.size() : 219
+matches_vec.size() : 175
+superpoint execution time : 30.2635 ms
+lightglue  execution time : 44.4258 ms
+--------------------------------------------------------------------------------
+95-th test : image_idx_0 == 15 , image_idx_1 == 13 
+lightglue_match_indices_0_int64_cuda : [219]
+lightglue_match_indices_1_int64_cuda : [219]
+inliers_vec.size() : 219
+matches_vec.size() : 199
+superpoint execution time : 29.7113 ms
+lightglue  execution time : 44.5775 ms
+--------------------------------------------------------------------------------
+96-th test : image_idx_0 == 13 , image_idx_1 == 9 
+lightglue_match_indices_0_int64_cuda : [52]
+lightglue_match_indices_1_int64_cuda : [52]
+inliers_vec.size() : 52
+matches_vec.size() : 43
+superpoint execution time : 29.6095 ms
+lightglue  execution time : 44.1596 ms
+--------------------------------------------------------------------------------
+97-th test : image_idx_0 == 9 , image_idx_1 == 8 
+lightglue_match_indices_0_int64_cuda : [397]
+lightglue_match_indices_1_int64_cuda : [397]
+inliers_vec.size() : 397
+matches_vec.size() : 379
+superpoint execution time : 28.94 ms
+lightglue  execution time : 44.1121 ms
+--------------------------------------------------------------------------------
+98-th test : image_idx_0 == 8 , image_idx_1 == 12 
+lightglue_match_indices_0_int64_cuda : [47]
+lightglue_match_indices_1_int64_cuda : [47]
+inliers_vec.size() : 47
+matches_vec.size() : 37
+superpoint execution time : 29.6249 ms
+lightglue  execution time : 44.7154 ms
+--------------------------------------------------------------------------------
+99-th test : image_idx_0 == 12 , image_idx_1 == 8 
+lightglue_match_indices_0_int64_cuda : [47]
+lightglue_match_indices_1_int64_cuda : [47]
+inliers_vec.size() : 47
+matches_vec.size() : 43
+superpoint execution time : 28.8891 ms
+lightglue  execution time : 44.5825 ms
+--------------------------------------------------------------------------------
+superpoint average execution time : 30.2139 ms
+lightglue  average execution time : 45.2863 ms
+--------------------------------------------------------------------------------
